@@ -3,123 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fénix TV & Music</title>
+    <title>Fénix TV - Edición Final</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        body { background: #000; color: #d4af37; font-family: sans-serif; margin: 0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
-        .reproductor { position: sticky; top: 0; background: #000; border-bottom: 2px solid #d4af37; z-index: 100; }
-        #video-container { width: 100%; aspect-ratio: 16/9; position: relative; }
-        video, iframe { width: 100%; height: 100%; border: none; }
+        body { background: #000; color: #d4af37; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        .reproductor-area { position: sticky; top: 0; background: #000; z-index: 1000; border-bottom: 2px solid #d4af37; }
+        video { width: 100%; aspect-ratio: 16/9; background: #111; }
         
-        /* Capa invisible para gestos */
-        #gesture-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
-        .indicador { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; display: none; z-index: 20; border: 1px solid #d4af37; }
+        .controles-fijos { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; background: #1a1a1a; padding: 10px; border-bottom: 1px solid #333; }
+        .btn-ui { background: #d4af37; color: #000; border: none; padding: 10px; border-radius: 5px; font-weight: bold; font-size: 11px; flex: 1; min-width: 80px; }
 
-        .lista { flex: 1; overflow-y: auto; padding: 15px; background: #050505; }
-        .seccion { border-left: 4px solid #d4af37; padding-left: 10px; margin: 20px 0 10px; font-weight: bold; text-transform: uppercase; font-size: 14px; }
+        .lista-canales { flex: 1; overflow-y: auto; padding: 15px; background: #050505; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
-        .btn { background: #1a1a1a; border: 1px solid #333; padding: 12px 5px; color: #fff; border-radius: 8px; font-size: 11px; cursor: pointer; }
-        .btn:active { background: #d4af37; color: #000; }
-        .btn-music { border-color: #ff0050; box-shadow: 0 0 5px rgba(255,0,80,0.3); }
+        .btn-canal { background: #222; border: 1px solid #444; padding: 15px 5px; color: #fff; border-radius: 8px; font-size: 11px; cursor: pointer; }
+        .btn-canal:active { background: #d4af37; color: #000; }
+        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2000; transition: 0.3s; }
     </style>
 </head>
 <body>
 
-<div class="reproductor">
-    <div id="gesture-layer"></div>
-    <div id="indicador" class="indicador"></div>
-    <div id="screen">
-        <video id="v-player" controls autoplay></video>
+<div id="overlay"></div>
+
+<div class="reproductor-area">
+    <video id="tv-player" controls autoplay playsinline></video>
+    <div class="controles-fijos">
+        <button class="btn-ui" onclick="ajustarVol(0.1)">VOL +</button>
+        <button class="btn-ui" onclick="ajustarVol(-0.1)">VOL -</button>
+        <button class="btn-ui" onclick="toggleBrillo()">BRILLO</button>
+        <button class="btn-ui" onclick="activarPiP()" id="btn-pip">PANTALLA FLOTANTE</button>
     </div>
 </div>
 
-<div class="lista">
-    <div class="seccion">🎵 FÉNIX MUSIC (YouTube)</div>
-    <div class="grid">
-        <button class="btn btn-music" onclick="playYT('https://www.youtube.com/embed/live_stream?channel=UC7tD6IFr5p7jAnGk7SYFovg')">LO-FI 24/7</button>
-        <button class="btn btn-music" onclick="playYT('https://www.youtube.com/embed/live_stream?channel=UCv9V5A-u7M1M8M_M_M_M_M_')">RADIO POP</button>
-        <button class="btn btn-music" onclick="playYT('https://www.youtube.com/embed/jfKfPfyJRdk')">LO-FI GIRL</button>
+<div class="lista-canales">
+    <div style="margin-bottom: 10px; border-left: 3px solid #d4af37; padding-left: 10px;">SEÑALES PRINCIPALES</div>
+    <div class="grid" id="principales">
+        <button class="btn-canal" onclick="conectar('https://television-libre.online/pasatv/telefe.m3u8')">TELEFE</button>
+        <button class="btn-canal" onclick="conectar('https://television-libre.online/pasatv/eltrece.m3u8')">EL TRECE</button>
+        <button class="btn-canal" onclick="conectar('https://television-libre.online/pasatv/tycsports.m3u8')">TYC SPORTS</button>
+        <button class="btn-canal" onclick="conectar('https://television-libre.online/pasatv/cronica.m3u8')">CRÓNICA</button>
     </div>
 
-    <div class="seccion">📺 TELEVISIÓN (Sincronizada)</div>
-    <div class="grid" id="grilla-tv">
-        <button class="btn" onclick="playM3U8('https://television-libre.online/pasatv/telefe.m3u8')">TELEFE</button>
-        <button class="btn" onclick="playM3U8('https://television-libre.online/pasatv/eltrece.m3u8')">EL TRECE</button>
-        <button class="btn" onclick="playM3U8('https://television-libre.online/pasatv/tycsports.m3u8')">TYC SPORTS</button>
-    </div>
-
-    <div class="seccion">🇦🇷 MÁS CANALES ARG</div>
-    <div id="auto-lista" class="grid">Cargando señales...</div>
+    <div style="margin: 20px 0 10px; border-left: 3px solid #d4af37; padding-left: 10px;">GRILLA ARGENTINA (AUTO)</div>
+    <div class="grid" id="lista-gratis">Cargando...</div>
 </div>
 
 <script>
-    const screen = document.getElementById('screen');
-    const gestos = document.getElementById('gesture-layer');
-    const ind = document.getElementById('indicador');
-    let vol = 1;
-    let bri = 100;
+    const player = document.getElementById('tv-player');
+    const overlay = document.getElementById('overlay');
+    let hls = new Hls();
+    let brilloNivel = 0;
 
-    function playM3U8(url) {
-        screen.innerHTML = '<video id="v-player" controls autoplay></video>';
-        const v = document.getElementById('v-player');
+    function conectar(url) {
         if (Hls.isSupported()) {
-            const hls = new Hls();
+            hls.destroy();
+            hls = new Hls();
             hls.loadSource(url);
-            hls.attachMedia(v);
-        } else { v.src = url; }
+            hls.attachMedia(player);
+            player.play();
+        } else { player.src = url; }
     }
 
-    function playYT(url) {
-        screen.innerHTML = `<iframe src="${url}&autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+    function ajustarVol(val) { player.volume = Math.min(1, Math.max(0, player.volume + val)); }
+
+    function toggleBrillo() {
+        brilloNivel = (brilloNivel + 0.25) % 0.85;
+        overlay.style.background = `rgba(0,0,0,${brilloNivel})`;
     }
 
-    // --- LÓGICA DE GESTOS ---
-    let startY = 0;
-    gestos.addEventListener('touchstart', e => { startY = e.touches[0].clientY; });
-    gestos.addEventListener('touchmove', e => {
-        e.preventDefault();
-        const curY = e.touches[0].clientY;
-        const delta = (startY - curY) / 5;
-        const isRight = e.touches[0].clientX > window.innerWidth / 2;
-
-        if (isRight) {
-            vol = Math.min(1, Math.max(0, vol + delta/100));
-            const v = document.getElementById('v-player');
-            if(v) v.volume = vol;
-            showInd("Volumen: " + Math.round(vol*100) + "%");
-        } else {
-            bri = Math.min(150, Math.max(30, bri + delta));
-            document.body.style.filter = `brightness(${bri}%)`;
-            showInd("Brillo: " + Math.round(bri) + "%");
-        }
-        startY = curY;
-    }, {passive: false});
-
-    function showInd(txt) {
-        ind.innerText = txt; ind.style.display = 'block';
-        clearTimeout(window.t); window.t = setTimeout(() => ind.style.display='none', 800);
+    async function activarPiP() {
+        try {
+            if (player !== document.pictureInPictureElement) {
+                await player.requestPictureInPicture();
+            } else {
+                await document.exitPictureInPicture();
+            }
+        } catch (error) { alert("Tu celular no soporta pantalla flotante todavía."); }
     }
 
-    async function cargar() {
+    async function cargarAuto() {
         const res = await fetch("https://raw.githubusercontent.com/Iptv-org/iptv/master/streams/ar.m3u");
         const data = await res.text();
         const lineas = data.split('\n');
-        const lista = document.getElementById('auto-lista');
+        const lista = document.getElementById('lista-gratis');
         lista.innerHTML = "";
         lineas.forEach((l, i) => {
             if (l.includes('#EXTINF')) {
                 const n = l.split(',')[1].trim();
                 const u = lineas[i+1]?.trim();
-                if (u && u.startsWith('http') && !n.includes('Telefe')) {
+                if (u && u.startsWith('http')) {
                     const b = document.createElement('button');
-                    b.className = 'btn'; b.innerText = n;
-                    b.onclick = () => playM3U8(u);
+                    b.className = 'btn-canal';
+                    b.innerText = n;
+                    b.onclick = () => conectar(u);
                     lista.appendChild(b);
                 }
             }
         });
     }
-    cargar();
+    cargarAuto();
 </script>
 </body>
 </html>

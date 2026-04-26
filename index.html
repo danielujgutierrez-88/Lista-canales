@@ -3,57 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fénix TV - Edición Final</title>
+    <title>Fénix TV - Filtro AI</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         body { background: #000; color: #d4af37; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        .reproductor-area { position: sticky; top: 0; background: #000; z-index: 1000; border-bottom: 2px solid #d4af37; }
+        .reproductor-box { position: sticky; top: 0; background: #000; z-index: 100; border-bottom: 2px solid #d4af37; }
         video { width: 100%; aspect-ratio: 16/9; background: #111; }
         
-        .controles-fijos { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; background: #1a1a1a; padding: 10px; border-bottom: 1px solid #333; }
-        .btn-ui { background: #d4af37; color: #000; border: none; padding: 10px; border-radius: 5px; font-weight: bold; font-size: 11px; flex: 1; min-width: 80px; }
+        .panel-control { background: #1a1a1a; padding: 15px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid #333; }
+        .slider-container { display: flex; align-items: center; gap: 10px; color: #fff; font-size: 12px; }
+        input[type=range] { flex: 1; accent-color: #d4af37; }
 
-        .lista-canales { flex: 1; overflow-y: auto; padding: 15px; background: #050505; }
+        .lista-canales { flex: 1; overflow-y: auto; padding: 15px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
-        .btn-canal { background: #222; border: 1px solid #444; padding: 15px 5px; color: #fff; border-radius: 8px; font-size: 11px; cursor: pointer; }
-        .btn-canal:active { background: #d4af37; color: #000; }
-        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2000; transition: 0.3s; }
+        .btn-canal { background: #222; border: 1px solid #333; padding: 12px 5px; color: #fff; border-radius: 8px; font-size: 10px; display: block; }
+        .btn-canal.caido { display: none; } /* El filtro oculta los que no andan */
     </style>
 </head>
 <body>
 
-<div id="overlay"></div>
-
-<div class="reproductor-area">
-    <video id="tv-player" controls autoplay playsinline></video>
-    <div class="controles-fijos">
-        <button class="btn-ui" onclick="ajustarVol(0.1)">VOL +</button>
-        <button class="btn-ui" onclick="ajustarVol(-0.1)">VOL -</button>
-        <button class="btn-ui" onclick="toggleBrillo()">BRILLO</button>
-        <button class="btn-ui" onclick="activarPiP()" id="btn-pip">PANTALLA FLOTANTE</button>
+<div class="reproductor-box">
+    <video id="player" controls autoplay playsinline></video>
+    <div class="panel-control">
+        <div class="slider-container">
+            <span>VOL</span>
+            <input type="range" min="0" max="1" step="0.1" value="1" oninput="controlVol(this.value)">
+        </div>
+        <div class="slider-container">
+            <span>BRILLO</span>
+            <input type="range" min="30" max="150" value="100" oninput="controlBri(this.value)">
+        </div>
+        <button onclick="activarPiP()" style="background:#333; color:#fff; border:none; padding:5px; border-radius:5px; font-size:10px;">PANTALLA FLOTANTE (PiP)</button>
     </div>
 </div>
 
 <div class="lista-canales">
-    <div style="margin-bottom: 10px; border-left: 3px solid #d4af37; padding-left: 10px;">SEÑALES PRINCIPALES</div>
-    <div class="grid" id="principales">
-        <button class="btn-canal" onclick="conectar('https://television-libre.online/pasatv/telefe.m3u8')">TELEFE</button>
-        <button class="btn-canal" onclick="conectar('https://television-libre.online/pasatv/eltrece.m3u8')">EL TRECE</button>
-        <button class="btn-canal" onclick="conectar('https://television-libre.online/pasatv/tycsports.m3u8')">TYC SPORTS</button>
-        <button class="btn-canal" onclick="conectar('https://television-libre.online/pasatv/cronica.m3u8')">CRÓNICA</button>
-    </div>
-
-    <div style="margin: 20px 0 10px; border-left: 3px solid #d4af37; padding-left: 10px;">GRILLA ARGENTINA (AUTO)</div>
-    <div class="grid" id="lista-gratis">Cargando...</div>
+    <div style="font-size: 12px; margin-bottom: 10px;">SINTONIZANDO SEÑALES ACTIVAS...</div>
+    <div class="grid" id="contenedor"></div>
 </div>
 
 <script>
-    const player = document.getElementById('tv-player');
-    const overlay = document.getElementById('overlay');
+    const player = document.getElementById('player');
     let hls = new Hls();
-    let brilloNivel = 0;
 
-    function conectar(url) {
+    function sintonizar(url) {
         if (Hls.isSupported()) {
             hls.destroy();
             hls = new Hls();
@@ -63,44 +56,41 @@
         } else { player.src = url; }
     }
 
-    function ajustarVol(val) { player.volume = Math.min(1, Math.max(0, player.volume + val)); }
-
-    function toggleBrillo() {
-        brilloNivel = (brilloNivel + 0.25) % 0.85;
-        overlay.style.background = `rgba(0,0,0,${brilloNivel})`;
-    }
+    function controlVol(v) { player.volume = v; }
+    function controlBri(b) { document.body.style.filter = `brightness(${b}%)`; }
 
     async function activarPiP() {
-        try {
-            if (player !== document.pictureInPictureElement) {
-                await player.requestPictureInPicture();
-            } else {
-                await document.exitPictureInPicture();
-            }
-        } catch (error) { alert("Tu celular no soporta pantalla flotante todavía."); }
+        try { await player.requestPictureInPicture(); } catch (e) { alert("PiP no disponible"); }
     }
 
-    async function cargarAuto() {
+    async function cargarYFiltrar() {
         const res = await fetch("https://raw.githubusercontent.com/Iptv-org/iptv/master/streams/ar.m3u");
         const data = await res.text();
         const lineas = data.split('\n');
-        const lista = document.getElementById('lista-gratis');
-        lista.innerHTML = "";
-        lineas.forEach((l, i) => {
-            if (l.includes('#EXTINF')) {
-                const n = l.split(',')[1].trim();
-                const u = lineas[i+1]?.trim();
-                if (u && u.startsWith('http')) {
-                    const b = document.createElement('button');
-                    b.className = 'btn-canal';
-                    b.innerText = n;
-                    b.onclick = () => conectar(u);
-                    lista.appendChild(b);
+        const contenedor = document.getElementById('contenedor');
+
+        for (let i = 0; i < lineas.length; i++) {
+            if (lineas[i].includes('#EXTINF')) {
+                const nombre = lineas[i].split(',')[1].trim();
+                const url = lineas[i+1]?.trim();
+
+                if (url && url.startsWith('http')) {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn-canal';
+                    btn.innerText = nombre;
+                    btn.onclick = () => sintonizar(url);
+                    contenedor.appendChild(btn);
+
+                    // --- FILTRO INTELIGENTE ---
+                    // Intenta "saludar" al link. Si el link no responde, borra el botón.
+                    fetch(url, { method: 'HEAD', mode: 'no-cors' }).catch(() => {
+                        btn.classList.add('caido');
+                    });
                 }
             }
-        });
+        }
     }
-    cargarAuto();
+    cargarYFiltrar();
 </script>
 </body>
 </html>

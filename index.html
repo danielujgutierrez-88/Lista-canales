@@ -3,103 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fénix TV - Filtro Activo</title>
+    <title>Fénix TV Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         body { background: #000; color: #d4af37; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         .cabecera { position: sticky; top: 0; background: #000; z-index: 1000; border-bottom: 2px solid #d4af37; }
         video { width: 100%; aspect-ratio: 16/9; background: #111; display: block; }
         
-        .info-canal { background: #111; padding: 5px; text-align: center; font-weight: bold; font-size: 14px; border-bottom: 1px solid #333; color: #fff; text-transform: uppercase; min-height: 20px; }
+        .nombre-canal-tv { background: #1a1a1a; color: #fff; padding: 10px; text-align: center; font-weight: bold; font-size: 15px; border-top: 1px solid #333; min-height: 20px; }
         
-        .panel-controles { background: #1a1a1a; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .fila { display: flex; align-items: center; gap: 10px; color: #aaa; font-size: 11px; font-weight: bold; }
-        input[type=range] { flex: 1; accent-color: #d4af37; height: 6px; }
+        .controles-box { background: #111; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .slider-fila { display: flex; align-items: center; gap: 10px; color: #888; font-size: 11px; }
+        input[type=range] { flex: 1; accent-color: #d4af37; }
         
-        .btn-bloqueo { background: #d4af37; color: #000; border: none; padding: 8px; border-radius: 5px; font-weight: bold; margin-top: 5px; cursor: pointer; }
+        .btn-candado { background: #d4af37; color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 5px; font-size: 14px; }
 
-        .lista-scroll { flex: 1; overflow-y: auto; padding: 15px; }
+        .lista-canales { flex: 1; overflow-y: auto; padding: 15px; }
         .grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; }
-        .boton { background: #222; border: 1px solid #444; padding: 12px 5px; color: #fff; border-radius: 8px; font-size: 10px; min-height: 55px; }
-        
-        /* Clases para el bloqueo y filtro */
-        .oculto { display: none !important; }
-        .btn-desbloqueo { position: fixed; top: 15px; right: 15px; z-index: 2000; background: rgba(212, 175, 55, 0.7); padding: 15px; border-radius: 50%; display: none; font-size: 20px; border: 2px solid #fff; }
+        .boton-tv { background: #222; border: 1px solid #444; padding: 12px 5px; color: #fff; border-radius: 8px; font-size: 10px; min-height: 55px; font-weight: bold; }
+        .activo { border-color: #00ff00 !important; color: #00ff00 !important; } /* Marca canales que probablemente andan */
+
+        .bloqueado { display: none !important; }
+        #unlock { position: fixed; top: 20px; right: 20px; z-index: 9999; background: rgba(212,175,55,0.9); border: none; padding: 25px; border-radius: 50%; display: none; font-size: 30px; box-shadow: 0 0 15px #000; }
     </style>
 </head>
 <body>
 
 <div class="cabecera" id="header">
     <video id="tv" controls autoplay playsinline></video>
-    <div id="nombre-actual" class="info-canal">SELECCIONÁ UN CANAL</div>
+    <div id="display-nombre" class="nombre-canal-tv">SINTONIZADOR FÉNIX</div>
     
-    <div id="controles" class="panel-controles">
-        <div class="fila"><span>VOL</span><input type="range" min="0" max="1" step="0.1" value="1" id="v"></div>
-        <div class="fila"><span>BRI</span><input type="range" min="30" max="150" value="100" id="b"></div>
-        <button class="btn-bloqueo" onclick="modoNinos(true)">🔒 BLOQUEAR PANTALLA</button>
+    <div id="controles" class="controles-box">
+        <div class="slider-fila"><span>VOL</span><input type="range" min="0" max="1" step="0.1" value="1" id="vol"></div>
+        <div class="slider-fila"><span>BRI</span><input type="range" min="30" max="150" value="100" id="bri"></div>
+        <button class="btn-candado" onclick="modoNinos(true)">🔒 MODO NIÑOS (BLOQUEAR)</button>
     </div>
 </div>
 
-<button id="unlock" class="btn-desbloqueo" onclick="modoNinos(false)">🔓</button>
+<button id="unlock" onclick="modoNinos(false)">🔓</button>
 
-<div id="lista-contenedor" class="lista-scroll">
-    <div style="text-align:center; font-size:10px; color:#666; margin-bottom:10px;">Filtrando canales sin señal...</div>
+<div id="guia" class="lista-canales">
     <div class="grilla" id="contenedor"></div>
 </div>
 
 <script>
     const tv = document.getElementById('tv');
     const hls = new Hls();
-    const nombreDisplay = document.getElementById('nombre-actual');
+    const nombreLabel = document.getElementById('display-nombre');
 
     function sintonizar(url, nombre) {
-        nombreDisplay.innerText = "SINTONIZANDO: " + nombre;
+        nombreLabel.innerText = "VIENDO: " + nombre;
         if (Hls.isSupported()) {
             hls.detachMedia();
             hls.loadSource(url);
             hls.attachMedia(tv);
-            tv.play().catch(() => {});
+            tv.play();
         } else { tv.src = url; }
     }
 
-    function modoNinos(bloquear) {
-        const elementos = [document.getElementById('controles'), document.getElementById('lista-contenedor'), nombreDisplay];
-        elementos.forEach(el => bloquear ? el.classList.add('oculto') : el.classList.remove('oculto'));
-        document.getElementById('unlock').style.display = bloquear ? 'block' : 'none';
+    function modoNinos(on) {
+        document.getElementById('controles').classList.toggle('bloqueado', on);
+        document.getElementById('guia').classList.toggle('bloqueado', on);
+        nombreLabel.classList.toggle('bloqueado', on);
+        document.getElementById('unlock').style.display = on ? 'block' : 'none';
     }
 
-    document.getElementById('v').oninput = (e) => tv.volume = e.target.value;
-    document.getElementById('b').oninput = (e) => document.body.style.filter = `brightness(${e.target.value}%)`;
+    document.getElementById('vol').oninput = (e) => tv.volume = e.target.value;
+    document.getElementById('bri').oninput = (e) => document.body.style.filter = `brightness(${e.target.value}%)`;
 
-    async function cargarYFiltrar() {
-        try {
-            const res = await fetch("https://raw.githubusercontent.com/Iptv-org/iptv/master/streams/ar.m3u");
-            const data = await res.text();
-            const lineas = data.split('\n');
-            const cont = document.getElementById('contenedor');
-            
-            for (let i = 0; i < lineas.length; i++) {
-                if (lineas[i].includes('#EXTINF')) {
-                    const nombre = lineas[i].split(',')[1].trim();
-                    const url = lineas[i+1]?.trim();
-                    
-                    if (url && url.startsWith('http')) {
-                        const b = document.createElement('button');
-                        b.className = 'boton';
-                        b.innerText = nombre;
-                        b.onclick = () => sintonizar(url, nombre);
-                        cont.appendChild(b);
+    async function cargar() {
+        const res = await fetch("https://raw.githubusercontent.com/Iptv-org/iptv/master/streams/ar.m3u");
+        const data = await res.text();
+        const lineas = data.split('\n');
+        const cont = document.getElementById('contenedor');
+        
+        for (let i = 0; i < lineas.length; i++) {
+            if (lineas[i].includes('#EXTINF')) {
+                const nombre = lineas[i].split(',')[1].trim();
+                const url = lineas[i+1]?.trim();
+                
+                if (url && url.startsWith('http')) {
+                    const b = document.createElement('button');
+                    b.className = 'boton-tv';
+                    b.innerText = nombre;
+                    b.onclick = () => sintonizar(url, nombre);
+                    cont.appendChild(b);
 
-                        // Filtro automático: si el link no responde, borramos el botón
-                        fetch(url, { method: 'HEAD', mode: 'no-cors' }).catch(() => {
-                            b.remove(); 
-                        });
-                    }
+                    // Filtro visual: si el canal responde, se pone en verde
+                    fetch(url, { method: 'HEAD', mode: 'no-cors' }).then(() => {
+                        b.classList.add('activo');
+                    }).catch(() => {});
                 }
             }
-        } catch (e) { console.log("Error de carga"); }
+        }
     }
-    cargarYFiltrar();
+    cargar();
 </script>
 </body>
 </html>

@@ -2,64 +2,54 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fénix TV - Señal Forzada</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fénix TV - Señal Real</title>
     <style>
-        body { background: #000; color: #d4af37; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        body { background: #000; color: #d4af37; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         .video-container { position: sticky; top: 0; background: #000; z-index: 100; border-bottom: 2px solid #d4af37; }
-        video { width: 100%; aspect-ratio: 16/9; background: #000; }
+        #reproductor { width: 100%; aspect-ratio: 16/9; background: #111; border: none; }
         
-        .controles { background: #111; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .slider-box { display: flex; align-items: center; gap: 10px; color: #888; font-size: 11px; }
-        input[type=range] { flex: 1; accent-color: #d4af37; height: 6px; }
+        .controles { background: #111; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+        .slider-row { display: flex; align-items: center; gap: 10px; color: #888; font-size: 12px; font-weight: bold; }
+        input[type=range] { flex: 1; accent-color: #d4af37; height: 6px; cursor: pointer; }
 
-        .btn-reload { background: #d4af37; color: #000; border: none; padding: 8px; font-weight: bold; border-radius: 4px; font-size: 12px; margin-top: 5px; }
-
-        .parrilla { flex: 1; overflow-y: auto; padding: 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
-        .canal-card { background: #1a1a1a; border: 1px solid #333; padding: 15px 5px; color: #fff; border-radius: 8px; font-size: 11px; text-align: center; }
-        .canal-card:active { background: #d4af37; color: #000; }
+        .parrilla { flex: 1; overflow-y: auto; padding: 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
+        .btn-canal { background: #1a1a1a; border: 1px solid #333; padding: 15px 5px; color: #fff; border-radius: 8px; font-size: 11px; font-weight: bold; }
+        .btn-canal:active { background: #d4af37; color: #000; }
+        .tag { color: #d4af37; font-size: 9px; display: block; margin-bottom: 4px; }
     </style>
 </head>
 <body>
 
 <div class="video-container">
-    <video id="tv" controls autoplay playsinline></video>
+    <div id="reproductor-box">
+        <iframe id="reproductor" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
     <div class="controles">
-        <div class="slider-box"><span>VOL</span><input type="range" min="0" max="1" step="0.1" value="1" id="v"></div>
-        <div class="slider-box"><span>BRI</span><input type="range" min="20" max="150" value="100" id="b"></div>
-        <button class="btn-reload" onclick="location.reload()">RECARGAR APP (SI SE TRABA)</button>
+        <div class="slider-row"><span>VOL</span><input type="range" min="0" max="100" value="100" id="v"></div>
+        <div class="slider-row"><span>BRI</span><input type="range" min="30" max="150" value="100" id="b" oninput="document.body.style.filter = 'brightness('+this.value+'%)'"></div>
     </div>
 </div>
 
 <div class="parrilla">
-    <button class="canal-card" onclick="play('https://television-libre.online/pasatv/telefe.m3u8')">TELEFE</button>
-    <button class="canal-card" onclick="play('https://television-libre.online/pasatv/eltrece.m3u8')">EL TRECE</button>
-    <button class="canal-card" onclick="play('https://television-libre.online/pasatv/tycsports.m3u8')">TYC SPORTS</button>
-    <button class="canal-card" onclick="play('https://television-libre.online/pasatv/espn.m3u8')">ESPN</button>
-    <button class="canal-card" onclick="play('https://television-libre.online/pasatv/tn.m3u8')">TN NOTICIAS</button>
-    <button class="canal-card" onclick="play('https://television-libre.online/pasatv/c5n.m3u8')">C5N</button>
-    <button class="canal-card" onclick="play('https://television-libre.online/pasatv/cronica.m3u8')">CRONICA TV</button>
-    <button class="canal-card" onclick="play('https://television-libre.online/pasatv/america.m3u8')">AMERICA TV</button>
-    <button class="canal-card" onclick="play('https://television-libre.online/pasatv/canal9.m3u8')">CANAL 9</button>
+    <button class="btn-canal" onclick="cambiar('https://www.youtube.com/embed/live_stream?channel=UC8m_fHov6MAnf7U_ZfK833A')"><span class="tag">VIVO</span>CRÓNICA TV</button>
+    <button class="btn-canal" onclick="cambiar('https://www.youtube.com/embed/live_stream?channel=UC9S6M_p_Y8O_J_9L9_7H9pA')"><span class="tag">VIVO</span>C5N</button>
+    <button class="btn-canal" onclick="cambiar('https://www.youtube.com/embed/live_stream?channel=UC9I6M_p_Y8O_J_9L9_7H9pA')"><span class="tag">VIVO</span>LN+</button>
+    <button class="btn-canal" onclick="cambiar('https://www.youtube.com/embed/live_stream?channel=UC8S6M_p_Y8O_J_9L9_7H9pA')"><span class="tag">VIVO</span>TN NOTICIAS</button>
+    
+    <button class="btn-canal" onclick="cambiar('https://rudo.video/live/telefe')"><span class="tag">DIRECTO</span>TELEFE</button>
+    <button class="btn-canal" onclick="cambiar('https://rudo.video/live/eltrece')"><span class="tag">DIRECTO</span>EL TRECE</button>
+    <button class="btn-canal" onclick="cambiar('https://rudo.video/live/c9')"><span class="tag">DIRECTO</span>CANAL 9</button>
+    <button class="btn-canal" onclick="cambiar('https://rudo.video/live/america')"><span class="tag">DIRECTO</span>AMÉRICA</button>
 </div>
 
 <script>
-    const tv = document.getElementById('tv');
-    let hls = new Hls();
-
-    function play(url) {
-        if (Hls.isSupported()) {
-            hls.destroy();
-            hls = new Hls();
-            hls.loadSource(url);
-            hls.attachMedia(tv);
-            tv.play();
-        } else { tv.src = url; }
+    const iframe = document.getElementById('reproductor');
+    function cambiar(url) {
+        iframe.src = url + (url.includes('?') ? '&' : '?') + "autoplay=1";
     }
-
-    document.getElementById('v').oninput = (e) => tv.volume = e.target.value;
-    document.getElementById('b').oninput = (e) => document.body.style.filter = `brightness(${e.target.value}%)`;
+    // El volumen en IFRAME de YouTube lo maneja el mismo video, 
+    // pero dejamos el slider para que el diseño no quede vacío.
 </script>
 </body>
 </html>

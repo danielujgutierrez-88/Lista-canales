@@ -3,94 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fénix TV - Filtro AI</title>
+    <title>Fénix TV - Ultra Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         body { background: #000; color: #d4af37; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        .reproductor-box { position: sticky; top: 0; background: #000; z-index: 100; border-bottom: 2px solid #d4af37; }
+        .reproductor-fijo { position: sticky; top: 0; background: #000; z-index: 1000; border-bottom: 2px solid #d4af37; flex-shrink: 0; }
         video { width: 100%; aspect-ratio: 16/9; background: #111; }
         
-        .panel-control { background: #1a1a1a; padding: 15px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid #333; }
-        .slider-container { display: flex; align-items: center; gap: 10px; color: #fff; font-size: 12px; }
-        input[type=range] { flex: 1; accent-color: #d4af37; }
+        .panel-controles { background: #111; padding: 10px; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid #333; }
+        .slider-row { display: flex; align-items: center; gap: 8px; color: #aaa; font-size: 11px; font-weight: bold;}
+        input[type=range] { flex: 1; accent-color: #d4af37; height: 5px;}
 
-        .lista-canales { flex: 1; overflow-y: auto; padding: 15px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
-        .btn-canal { background: #222; border: 1px solid #333; padding: 12px 5px; color: #fff; border-radius: 8px; font-size: 10px; display: block; }
-        .btn-canal.caido { display: none; } /* El filtro oculta los que no andan */
+        .lista-canales { flex: 1; overflow-y: auto; padding: 10px; }
+        .estado-carga { font-size: 11px; color: #888; text-align: center; padding: 5px; font-style: italic; }
+        .grid-canales { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+        .btn-canal { background: #1a1a1a; border: 1px solid #333; padding: 12px 5px; color: #fff; border-radius: 6px; font-size: 10px; text-align: center; transition: 0.2s;}
+        .btn-canal:active { background: #d4af37; color: #000; transform: scale(0.98); }
     </style>
 </head>
 <body>
 
-<div class="reproductor-box">
-    <video id="player" controls autoplay playsinline></video>
-    <div class="panel-control">
-        <div class="slider-container">
+<div class="reproductor-fijo">
+    <video id="tv-player" controls autoplay playsinline title="Fénix TV"></video>
+    <div class="panel-controles">
+        <div class="slider-row">
             <span>VOL</span>
-            <input type="range" min="0" max="1" step="0.1" value="1" oninput="controlVol(this.value)">
+            <input type="range" min="0" max="1" step="0.1" value="1" id="vol-slider">
         </div>
-        <div class="slider-container">
+        <div class="slider-row">
             <span>BRILLO</span>
-            <input type="range" min="30" max="150" value="100" oninput="controlBri(this.value)">
+            <input type="range" min="30" max="150" value="100" id="bri-slider">
         </div>
-        <button onclick="activarPiP()" style="background:#333; color:#fff; border:none; padding:5px; border-radius:5px; font-size:10px;">PANTALLA FLOTANTE (PiP)</button>
     </div>
 </div>
 
 <div class="lista-canales">
-    <div style="font-size: 12px; margin-bottom: 10px;">SINTONIZANDO SEÑALES ACTIVAS...</div>
-    <div class="grid" id="contenedor"></div>
+    <div id="status" class="estado-carga">Sincronizando canales...</div>
+    <div class="grid-canales" id="contenedor-canales"></div>
 </div>
 
 <script>
-    const player = document.getElementById('player');
-    let hls = new Hls();
+    const player = document.getElementById('tv-player');
+    const volSlider = document.getElementById('vol-slider');
+    const briSlider = document.getElementById('bri-slider');
+    const hls = new Hls();
 
-    function sintonizar(url) {
+    // Sintonizador Principal
+    function conectar(url) {
         if (Hls.isSupported()) {
             hls.destroy();
-            hls = new Hls();
             hls.loadSource(url);
             hls.attachMedia(player);
             player.play();
         } else { player.src = url; }
     }
 
-    function controlVol(v) { player.volume = v; }
-    function controlBri(b) { document.body.style.filter = `brightness(${b}%)`; }
+    // Controles Sliders
+    volSlider.oninput = (e) => player.volume = e.target.value;
+    briSlider.oninput = (e) => document.body.style.filter = `brightness(${e.target.value}%)`;
 
-    async function activarPiP() {
-        try { await player.requestPictureInPicture(); } catch (e) { alert("PiP no disponible"); }
-    }
+    // Cargador Inteligente con Validación
+    async function cargarYValidar() {
+        try {
+            const res = await fetch("https://raw.githubusercontent.com/Iptv-org/iptv/master/streams/ar.m3u");
+            const data = await res.text();
+            const lineas = data.split('\n');
+            const contenedor = document.getElementById('contenedor-canales');
+            const statusLabel = document.getElementById('status');
 
-    async function cargarYFiltrar() {
-        const res = await fetch("https://raw.githubusercontent.com/Iptv-org/iptv/master/streams/ar.m3u");
-        const data = await res.text();
-        const lineas = data.split('\n');
-        const contenedor = document.getElementById('contenedor');
+            contenedor.innerHTML = "";
+            statusLabel.innerText = "Validando señales en vivo...";
 
-        for (let i = 0; i < lineas.length; i++) {
-            if (lineas[i].includes('#EXTINF')) {
-                const nombre = lineas[i].split(',')[1].trim();
-                const url = lineas[i+1]?.trim();
+            let canalesAgregados = 0;
 
-                if (url && url.startsWith('http')) {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn-canal';
-                    btn.innerText = nombre;
-                    btn.onclick = () => sintonizar(url);
-                    contenedor.appendChild(btn);
+            for (let i = 0; i < lineas.length; i++) {
+                if (lineas[i].includes('#EXTINF')) {
+                    const nombre = lineas[i].split(',')[1].trim();
+                    const url = lineas[i+1]?.trim();
 
-                    // --- FILTRO INTELIGENTE ---
-                    // Intenta "saludar" al link. Si el link no responde, borra el botón.
-                    fetch(url, { method: 'HEAD', mode: 'no-cors' }).catch(() => {
-                        btn.classList.add('caido');
-                    });
+                    if (url && url.startsWith('http')) {
+                        // Crear el botón de inmediato para que la lista cargue rápido
+                        const btn = document.createElement('button');
+                        btn.className = 'btn-canal';
+                        btn.innerText = nombre;
+                        btn.onclick = () => conectar(url);
+                        contenedor.appendChild(btn);
+                        canalesAgregados++;
+
+                        // Validación Inteligente en Segundo Plano:
+                        // Intenta "saludar" al link. Si el link no responde, borra el botón.
+                        fetch(url, { method: 'HEAD', mode: 'no-cors' }).catch(() => {
+                            btn.style.display = 'none'; // Oculta si hay error
+                        });
+                    }
                 }
             }
+            if (canalesAgregados === 0) statusLabel.innerText = "No se encontraron canales válidos.";
+            else statusLabel.innerText = `${canalesAgregados} señales detectadas.`;
+
+        } catch (e) {
+            document.getElementById('status').innerText = "Error al conectar con la guía.";
         }
     }
-    cargarYFiltrar();
+    cargarYValidar();
 </script>
 </body>
 </html>

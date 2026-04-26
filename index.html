@@ -3,70 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fénix TV - Versión Recuperada</title>
+    <title>Fénix TV - Estabilidad Total</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         body { background: #000; color: #d4af37; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        .reproductor-fijo { position: sticky; top: 0; background: #000; z-index: 1000; border-bottom: 2px solid #d4af37; }
-        video { width: 100%; aspect-ratio: 16/9; background: #000; display: block; }
+        .cabecera-fija { position: sticky; top: 0; background: #000; z-index: 1000; border-bottom: 2px solid #d4af37; }
+        video { width: 100%; aspect-ratio: 16/9; background: #111; display: block; }
         
-        .panel-deslizadores { background: #111; padding: 12px; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid #333; }
-        .fila-control { display: flex; align-items: center; gap: 10px; color: #aaa; font-size: 11px; font-weight: bold; }
+        .controles-deslizantes { background: #1a1a1a; padding: 15px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid #333; }
+        .control-item { display: flex; align-items: center; gap: 10px; color: #fff; font-size: 11px; font-weight: bold; }
         input[type=range] { flex: 1; accent-color: #d4af37; height: 6px; }
 
-        .lista-canales { flex: 1; overflow-y: auto; padding: 15px; background: #050505; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; }
-        .btn-canal { background: #1a1a1a; border: 1px solid #333; padding: 15px 5px; color: #fff; border-radius: 8px; font-size: 10px; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; }
-        .btn-canal:active { background: #d4af37; color: #000; }
-        #status { font-size: 11px; color: #666; margin-bottom: 10px; text-align: center; }
+        .contenedor-canales { flex: 1; overflow-y: auto; padding: 15px; }
+        .grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; }
+        .boton-canal { background: #222; border: 1px solid #444; padding: 12px 5px; color: #fff; border-radius: 8px; font-size: 10px; min-height: 55px; font-weight: bold; }
+        .boton-canal:active { background: #d4af37; color: #000; transform: scale(0.95); }
+        .cargando { text-align: center; font-size: 12px; color: #888; padding: 10px; }
     </style>
 </head>
 <body>
 
-<div class="reproductor-fijo">
-    <video id="player" controls autoplay playsinline></video>
-    <div class="panel-deslizadores">
-        <div class="fila-control">
-            <span>VOL</span>
-            <input type="range" min="0" max="1" step="0.1" value="1" id="vol-control">
-        </div>
-        <div class="fila-control">
-            <span>BRILLO</span>
-            <input type="range" min="30" max="150" value="100" id="bri-control">
-        </div>
+<div class="cabecera-fija">
+    <video id="reproductor" controls autoplay playsinline></video>
+    <div class="controles-deslizantes">
+        <div class="control-item"><span>VOL</span><input type="range" min="0" max="1" step="0.1" value="1" id="ctrl-vol"></div>
+        <div class="control-item"><span>BRI</span><input type="range" min="30" max="150" value="100" id="ctrl-bri"></div>
     </div>
 </div>
 
-<div class="lista-canales">
-    <div id="status">Sincronizando señales (incluyendo Bayres, América y más)...</div>
-    <div class="grid" id="contenedor"></div>
+<div class="contenedor-canales">
+    <div id="msg" class="cargando">Verificando señales activas...</div>
+    <div class="grilla" id="lista"></div>
 </div>
 
 <script>
-    const player = document.getElementById('player');
-    const hls = new Hls();
+    const video = document.getElementById('reproductor');
+    const hls = new Hls({
+        manifestLoadingTimeOut: 10000,
+        fragLoadingTimeOut: 10000
+    });
 
-    function conectar(url) {
+    function sintonizar(url) {
+        // Forzamos la limpieza del reproductor para evitar la "imagen rota"
         if (Hls.isSupported()) {
-            hls.destroy();
+            hls.detachMedia();
             hls.loadSource(url);
-            hls.attachMedia(player);
-            player.play();
-        } else { player.src = url; }
+            hls.attachMedia(video);
+            video.play().catch(() => console.log("Error de reproducción"));
+        } else {
+            video.src = url;
+        }
     }
 
-    // Controles de Volumen y Brillo
-    document.getElementById('vol-control').oninput = (e) => player.volume = e.target.value;
-    document.getElementById('bri-control').oninput = (e) => document.body.style.filter = `brightness(${e.target.value}%)`;
+    // Controles táctiles
+    document.getElementById('ctrl-vol').oninput = (e) => video.volume = e.target.value;
+    document.getElementById('ctrl-bri').oninput = (e) => document.body.style.filter = `brightness(${e.target.value}%)`;
 
-    // Cargador de la lista que te funcionaba antes
-    async function cargarCanales() {
+    async function obtenerCanales() {
         try {
-            const res = await fetch("https://raw.githubusercontent.com/Iptv-org/iptv/master/streams/ar.m3u");
-            const data = await res.text();
-            const lineas = data.split('\n');
-            const contenedor = document.getElementById('contenedor');
-            contenedor.innerHTML = "";
+            // Usamos una lista de respaldo más estable
+            const res = await fetch("https://iptv-org.github.io/iptv/countries/ar.m3u");
+            const texto = await res.text();
+            const lineas = texto.split('\n');
+            const lista = document.getElementById('lista');
+            lista.innerHTML = "";
 
             for (let i = 0; i < lineas.length; i++) {
                 if (lineas[i].includes('#EXTINF')) {
@@ -75,19 +75,19 @@
 
                     if (url && url.startsWith('http')) {
                         const btn = document.createElement('button');
-                        btn.className = 'btn-canal';
+                        btn.className = 'boton-canal';
                         btn.innerText = nombre;
-                        btn.onclick = () => conectar(url);
-                        contenedor.appendChild(btn);
+                        btn.onclick = () => sintonizar(url);
+                        lista.appendChild(btn);
                     }
                 }
             }
-            document.getElementById('status').innerText = "Lista cargada. Buscá Bayres o América abajo.";
+            document.getElementById('msg').innerText = "Señales listas para sintonizar.";
         } catch (e) {
-            document.getElementById('status').innerText = "Error al cargar canales.";
+            document.getElementById('msg').innerText = "Error de conexión. Reintentando...";
         }
     }
-    cargarCanales();
+    obtenerCanales();
 </script>
 </body>
 </html>

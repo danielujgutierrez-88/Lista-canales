@@ -3,89 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fénix TV AI Plus</title>
+    <title>Fénix TV AI - Premium</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        body { background: #000; color: #d4af37; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        .reproductor { width: 100%; background: #000; border-bottom: 2px solid #d4af37; flex-shrink: 0; }
-        video { width: 100%; aspect-ratio: 16/9; }
-        .info-canal { padding: 5px; font-size: 12px; text-align: center; background: #111; color: #fff; border-bottom: 1px solid #333; }
-        .lista-contenedor { flex: 1; overflow-y: auto; padding: 10px; background: linear-gradient(to bottom, #000, #111); }
-        .seccion { border-left: 3px solid #d4af37; padding-left: 10px; margin: 15px 0 10px; font-size: 14px; font-weight: bold; text-transform: uppercase; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
-        .btn-smart { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 12px 5px; color: #fff; font-size: 10px; cursor: pointer; position: relative; }
-        .btn-smart.error { opacity: 0.4; border-color: #ff0000; }
-        .btn-smart.activo { border-color: #d4af37; background: #222; box-shadow: 0 0 5px #d4af37; }
-        #loading { text-align: center; padding: 20px; font-style: italic; }
+        body { background: #000; color: #d4af37; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        .reproductor-fijo { position: sticky; top: 0; background: #000; z-index: 1000; border-bottom: 2px solid #d4af37; }
+        #screen-overlay { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; background: rgba(0,0,0,0); z-index: 10; transition: 0.3s; }
+        video, iframe { width: 100%; aspect-ratio: 16/9; background: #000; border: none; }
+        
+        .controles { display: flex; justify-content: space-around; background: #111; padding: 10px; border-bottom: 1px solid #333; }
+        .btn-control { background: #d4af37; color: #000; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; font-size: 12px; }
+
+        .lista-canales { flex: 1; overflow-y: auto; padding: 15px; background: linear-gradient(180deg, #050505 0%, #111 100%); }
+        .categoria { color: #fff; font-size: 14px; margin: 20px 0 10px; border-left: 4px solid #d4af37; padding-left: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
+        .btn-canal { background: rgba(212, 175, 55, 0.05); border: 1px solid #333; border-radius: 10px; padding: 15px 5px; color: #fff; font-size: 11px; cursor: pointer; transition: 0.2s; }
+        .btn-canal:active { background: #d4af37; color: #000; }
+        .youtube-tag { color: #ff0000; font-size: 9px; display: block; margin-bottom: 4px; }
     </style>
 </head>
 <body>
 
-<div class="reproductor">
-    <video id="player" controls autoplay></video>
-    <div class="info-canal" id="titulo-reproduciendo">Seleccioná un canal para empezar</div>
+<div class="reproductor-fijo">
+    <div id="screen-overlay"></div>
+    <div id="video-container">
+        <video id="player" controls autoplay></video>
+    </div>
+    <div class="controles">
+        <button class="btn-control" onclick="ajustarVolumen(-0.1)">VOL -</button>
+        <button class="btn-control" onclick="ajustarVolumen(0.1)">VOL +</button>
+        <button class="btn-control" onclick="cambiarBrillo()">BRILLO</button>
+    </div>
 </div>
 
-<div class="lista-contenedor">
-    <div class="seccion">💎 Principales (Sincronizados)</div>
-    <div class="grid" id="destacados">
-        <button class="btn-smart" onclick="play('https://television-libre.online/pasatv/espn.m3u8', 'ESPN')">ESPN</button>
-        <button class="btn-smart" onclick="play('https://television-libre.online/pasatv/tntsports.m3u8', 'TNT SPORTS')">TNT SPORTS</button>
-        <button class="btn-smart" onclick="play('https://television-libre.online/pasatv/cronica.m3u8', 'CRÓNICA TV')">CRÓNICA</button>
-        <button class="btn-smart" onclick="play('https://television-libre.online/pasatv/c5n.m3u8', 'C5N')">C5N</button>
-        <button class="btn-smart" onclick="play('https://television-libre.online/pasatv/telefe.m3u8', 'TELEFE')">TELEFE</button>
+<div class="lista-canales">
+    <div class="categoria">📺 SEÑALES 24/7 (YouTube)</div>
+    <div class="grid">
+        <button class="btn-canal" onclick="playYT('https://www.youtube.com/embed/live_stream?channel=UC8m_fHov6MAnf7U_ZfK833A')"><span class="youtube-tag">OFICIAL</span>CRÓNICA TV</button>
+        <button class="btn-canal" onclick="playYT('https://www.youtube.com/embed/live_stream?channel=UC9S6M_p_Y8O_J_9L9_7H9pA')"><span class="youtube-tag">OFICIAL</span>C5N</button>
+        <button class="btn-canal" onclick="playYT('https://www.youtube.com/embed/live_stream?channel=UC9I6M_p_Y8O_J_9L9_7H9pA')"><span class="youtube-tag">OFICIAL</span>LN+</button>
+        <button class="btn-canal" onclick="playYT('https://www.youtube.com/embed/live_stream?channel=UC8S6M_p_Y8O_J_9L9_7H9pA')"><span class="youtube-tag">OFICIAL</span>TN</button>
     </div>
 
-    <div class="seccion">🇦🇷 Resto de Grilla (Filtro AI)</div>
-    <div id="loading">Sincronizando señales...</div>
-    <div class="grid" id="lista-ia"></div>
+    <div class="categoria">⚽ DEPORTES Y AIRE</div>
+    <div class="grid" id="grilla-aire">
+        <button class="btn-canal" onclick="playM3U8('https://television-libre.online/pasatv/telefe.m3u8')">TELEFE</button>
+        <button class="btn-canal" onclick="playM3U8('https://television-libre.online/pasatv/eltrece.m3u8')">EL TRECE</button>
+        <button class="btn-canal" onclick="playM3U8('https://television-libre.online/pasatv/espn.m3u8')">ESPN</button>
+        <button class="btn-canal" onclick="playM3U8('https://television-libre.online/pasatv/tycsports.m3u8')">TYC SPORTS</button>
+    </div>
 </div>
 
 <script>
     const video = document.getElementById('player');
+    const container = document.getElementById('video-container');
+    const overlay = document.getElementById('screen-overlay');
     const hls = new Hls();
-    const titulo = document.getElementById('titulo-reproduciendo');
+    let nivelBrillo = 0;
 
-    function play(url, nombre) {
-        titulo.innerText = "Reproduciendo: " + nombre;
+    function playM3U8(url) {
+        container.innerHTML = '<video id="player" controls autoplay></video>';
+        const newPlayer = document.getElementById('player');
         if (Hls.isSupported()) {
+            const hls = new Hls();
             hls.loadSource(url);
-            hls.attachMedia(video);
-            video.play();
-        } else {
-            video.src = url;
-            video.play();
+            hls.attachMedia(newPlayer);
         }
     }
 
-    async function cargarGrilla() {
-        try {
-            const res = await fetch("https://raw.githubusercontent.com/Iptv-org/iptv/master/streams/ar.m3u");
-            const data = await res.text();
-            const lineas = data.split('\n');
-            const contenedor = document.getElementById('lista-ia');
-            document.getElementById('loading').style.display = 'none';
-
-            for (let i = 0; i < lineas.length; i++) {
-                if (lineas[i].includes('#EXTINF')) {
-                    const nombre = lineas[i].split(',')[1].trim();
-                    const url = lineas[i+1]?.trim();
-
-                    // Inteligencia de descarte: solo canales que no sean los repetidos de arriba
-                    if (url && url.startsWith('http') && !['Telefe', 'C5N', 'Cronica', 'ESPN'].some(ex => nombre.includes(ex))) {
-                        const btn = document.createElement('button');
-                        btn.className = 'btn-smart';
-                        btn.innerText = nombre;
-                        btn.onclick = () => play(url, nombre);
-                        contenedor.appendChild(btn);
-                    }
-                }
-            }
-        } catch (e) {
-            document.getElementById('loading').innerText = "Error de conexión";
-        }
+    function playYT(url) {
+        container.innerHTML = `<iframe src="${url}&autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
     }
-    cargarGrilla();
+
+    function ajustarVolumen(cant) {
+        const p = document.getElementById('player');
+        if(p) p.volume = Math.min(1, Math.max(0, p.volume + cant));
+    }
+
+    function cambiarBrillo() {
+        nivelBrillo = (nivelBrillo + 0.2) % 0.8;
+        overlay.style.background = `rgba(0,0,0,${nivelBrillo})`;
+    }
 </script>
 </body>
 </html>

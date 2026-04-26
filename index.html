@@ -3,64 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fénix TV</title>
+    <title>Fénix TV Premium</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        body { background: #050505; color: #d4af37; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; text-align: center; }
-        h1 { margin-bottom: 30px; text-shadow: 2px 2px #000; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; max-width: 1000px; margin: 0 auto; }
-        .btn { background: #1a1a1a; border: 1px solid #d4af37; padding: 20px; border-radius: 12px; color: #fff; cursor: pointer; transition: 0.3s; font-weight: bold; }
-        .btn:hover { background: #d4af37; color: #000; }
-        video { width: 100%; max-width: 700px; border: 3px solid #d4af37; border-radius: 15px; margin-bottom: 30px; display: none; box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); }
+        body { background: #0a0a0a; color: #fff; font-family: sans-serif; margin: 0; padding: 15px; }
+        .logo-header { padding: 20px; border-bottom: 2px solid #d4af37; margin-bottom: 20px; }
+        h1 { color: #d4af37; letter-spacing: 3px; font-size: 24px; margin: 0; }
+        video { width: 100%; border-radius: 12px; border: 2px solid #d4af37; background: #000; margin-bottom: 20px; display: none; }
+        .seccion-titulo { text-align: left; color: #d4af37; font-size: 18px; margin: 20px 0 10px 5px; border-left: 4px solid #d4af37; padding-left: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+        .btn { background: #1a1a1a; border: 1px solid #333; padding: 15px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; min-height: 50px; }
+        .btn:hover { border-color: #d4af37; background: #222; }
+        .btn-premium { border: 1px solid #d4af37; background: linear-gradient(145deg, #1a1a1a, #000); color: #d4af37; }
     </style>
 </head>
 <body>
-    <h1>FÉNIX TV 💎</h1>
+    <div class="logo-header"><h1>FÉNIX TV 💎</h1></div>
+    
     <video id="video" controls autoplay></video>
-    <div class="grid" id="lista">Cargando guía de canales...</div>
+
+    <div class="seccion-titulo">DESTACADOS PREMIUM</div>
+    <div class="grid" id="destacados">
+        <div class="btn btn-premium" onclick="reproducir('https://television-libre.online/pasatv/espn.m3u8')">ESPN</div>
+        <div class="btn btn-premium" onclick="reproducir('https://television-libre.online/pasatv/tycsports.m3u8')">TYC SPORTS</div>
+        <div class="btn btn-premium" onclick="reproducir('https://television-libre.online/pasatv/telefe.m3u8')">TELEFE</div>
+        <div class="btn btn-premium" onclick="reproducir('https://television-libre.online/pasatv/eltrece.m3u8')">EL TRECE</div>
+    </div>
+
+    <div class="seccion-titulo">MÁS CANALES (AUTO)</div>
+    <div class="grid" id="lista">Cargando señales...</div>
 
     <script>
         const video = document.getElementById('video');
-        const lista = document.getElementById('lista');
-        const fuenteRespaldo = "https://raw.githubusercontent.com/Iptv-org/iptv/master/streams/ar.m3u";
-
-        async function cargarCanales() {
-            try {
-                const res = await fetch(fuenteRespaldo);
-                const data = await res.text();
-                const lineas = data.split('\n');
-                lista.innerHTML = "";
-                
-                lineas.forEach((linea, i) => {
-                    if (linea.includes('#EXTINF')) {
-                        const nombre = linea.split(',')[1].trim();
-                        const url = lineas[i+1].trim();
-                        if (url.startsWith('http')) {
-                            const boton = document.createElement('div');
-                            boton.className = 'btn';
-                            boton.innerText = nombre;
-                            boton.onclick = () => {
-                                video.style.display = "block";
-                                if (Hls.isSupported()) {
-                                    const hls = new Hls();
-                                    hls.loadSource(url);
-                                    hls.attachMedia(video);
-                                    video.play();
-                                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                                    video.src = url;
-                                    video.play();
-                                }
-                                window.scrollTo(0,0);
-                            };
-                            lista.appendChild(boton);
-                        }
-                    }
-                });
-            } catch (e) {
-                lista.innerText = "Error al cargar los canales de respaldo.";
-            }
+        function reproducir(url) {
+            video.style.display = "block";
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(video);
+            } else { video.src = url; }
+            window.scrollTo(0,0);
         }
-        cargarCanales();
+
+        async function cargarMas() {
+            const res = await fetch("https://raw.githubusercontent.com/Iptv-org/iptv/master/streams/ar.m3u");
+            const data = await res.text();
+            const lineas = data.split('\n');
+            const lista = document.getElementById('lista');
+            lista.innerHTML = "";
+            lineas.forEach((linea, i) => {
+                if (linea.includes('#EXTINF') && !linea.includes('Telefe') && !linea.includes('Trece')) {
+                    const nombre = linea.split(',')[1].trim();
+                    const url = lineas[i+1].trim();
+                    if (url.startsWith('http')) {
+                        const btn = document.createElement('div');
+                        btn.className = 'btn';
+                        btn.innerText = nombre;
+                        btn.onclick = () => reproducir(url);
+                        lista.appendChild(btn);
+                    }
+                }
+            });
+        }
+        cargarMas();
     </script>
 </body>
 </html>

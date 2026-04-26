@@ -3,35 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fénix TV Premium</title>
+    <title>Fénix TV Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        body { background: #0a0a0a; color: #fff; font-family: sans-serif; margin: 0; padding: 15px; }
-        .logo-header { padding: 20px; border-bottom: 2px solid #d4af37; margin-bottom: 20px; }
-        h1 { color: #d4af37; letter-spacing: 3px; font-size: 24px; margin: 0; }
-        video { width: 100%; border-radius: 12px; border: 2px solid #d4af37; background: #000; margin-bottom: 20px; display: none; }
-        .seccion-titulo { text-align: left; color: #d4af37; font-size: 18px; margin: 20px 0 10px 5px; border-left: 4px solid #d4af37; padding-left: 10px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
-        .btn { background: #1a1a1a; border: 1px solid #333; padding: 15px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; min-height: 50px; }
-        .btn:hover { border-color: #d4af37; background: #222; }
-        .btn-premium { border: 1px solid #d4af37; background: linear-gradient(145deg, #1a1a1a, #000); color: #d4af37; }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 10px; text-align: center; }
+        .header { border-bottom: 2px solid #d4af37; padding: 15px; margin-bottom: 15px; }
+        h1 { color: #d4af37; margin: 0; font-size: 22px; }
+        video { width: 100%; border: 2px solid #d4af37; border-radius: 10px; display: none; margin-bottom: 20px; }
+        .categoria { text-align: left; color: #d4af37; font-weight: bold; margin: 15px 0 5px 5px; border-left: 3px solid #d4af37; padding-left: 8px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; }
+        .btn { background: #1a1a1a; border: 1px solid #333; padding: 12px 5px; border-radius: 6px; font-size: 11px; color: #fff; cursor: pointer; }
+        .btn-esp { border: 1px solid #d4af37; background: #000; color: #d4af37; }
     </style>
 </head>
 <body>
-    <div class="logo-header"><h1>FÉNIX TV 💎</h1></div>
-    
+    <div class="header"><h1>FÉNIX TV 💎</h1></div>
     <video id="video" controls autoplay></video>
 
-    <div class="seccion-titulo">DESTACADOS PREMIUM</div>
-    <div class="grid" id="destacados">
-        <div class="btn btn-premium" onclick="reproducir('https://television-libre.online/pasatv/espn.m3u8')">ESPN</div>
-        <div class="btn btn-premium" onclick="reproducir('https://television-libre.online/pasatv/tycsports.m3u8')">TYC SPORTS</div>
-        <div class="btn btn-premium" onclick="reproducir('https://television-libre.online/pasatv/telefe.m3u8')">TELEFE</div>
-        <div class="btn btn-premium" onclick="reproducir('https://television-libre.online/pasatv/eltrece.m3u8')">EL TRECE</div>
+    <div class="categoria">⚽ DEPORTES (Respaldo)</div>
+    <div class="grid">
+        <div class="btn btn-esp" onclick="reproducir('https://television-libre.online/pasatv/espn.m3u8')">ESPN 1</div>
+        <div class="btn btn-esp" onclick="reproducir('https://television-libre.online/pasatv/tycsports.m3u8')">TyC Sports</div>
+        <div class="btn btn-esp" onclick="reproducir('https://television-libre.online/pasatv/tntsports.m3u8')">TNT Sports</div>
     </div>
 
-    <div class="seccion-titulo">MÁS CANALES (AUTO)</div>
-    <div class="grid" id="lista">Cargando señales...</div>
+    <div class="categoria">📺 AIRE Y NOTICIAS</div>
+    <div class="grid">
+        <div class="btn" onclick="reproducir('https://television-libre.online/pasatv/telefe.m3u8')">Telefe</div>
+        <div class="btn" onclick="reproducir('https://television-libre.online/pasatv/eltrece.m3u8')">El Trece</div>
+        <div class="btn" onclick="reproducir('https://television-libre.online/pasatv/c5n.m3u8')">C5N</div>
+        <div class="btn" onclick="reproducir('https://television-libre.online/pasatv/tn.m3u8')">TN</div>
+    </div>
+
+    <div class="categoria">🔄 MÁS CANALES (Auto)</div>
+    <div id="lista-auto" class="grid"></div>
 
     <script>
         const video = document.getElementById('video');
@@ -45,17 +50,16 @@
             window.scrollTo(0,0);
         }
 
-        async function cargarMas() {
+        async function cargarAuto() {
             const res = await fetch("https://raw.githubusercontent.com/Iptv-org/iptv/master/streams/ar.m3u");
             const data = await res.text();
             const lineas = data.split('\n');
-            const lista = document.getElementById('lista');
-            lista.innerHTML = "";
+            const lista = document.getElementById('lista-auto');
             lineas.forEach((linea, i) => {
-                if (linea.includes('#EXTINF') && !linea.includes('Telefe') && !linea.includes('Trece')) {
+                if (linea.includes('#EXTINF')) {
                     const nombre = linea.split(',')[1].trim();
                     const url = lineas[i+1].trim();
-                    if (url.startsWith('http')) {
+                    if (url.startsWith('http') && !nombre.includes('Telefe')) {
                         const btn = document.createElement('div');
                         btn.className = 'btn';
                         btn.innerText = nombre;
@@ -65,7 +69,7 @@
                 }
             });
         }
-        cargarMas();
+        cargarAuto();
     </script>
 </body>
 </html>

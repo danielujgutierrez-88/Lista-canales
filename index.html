@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fénix TV Premium</title>
+    <style>
+        body { background: #0a0a0a; color: #fff; font-family: sans-serif; margin: 0; text-align: center; }
+        header { background: linear-gradient(145deg, #1a1a1a, #000); padding: 30px; border-bottom: 2px solid #d4af37; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4); }
+        h1 { color: #d4af37; letter-spacing: 4px; margin: 0; font-size: 28px; }
+        .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 20px; padding: 25px; }
+        .canal-card { background: #151515; border: 1px solid #333; border-radius: 15px; padding: 20px; transition: 0.3s; cursor: pointer; text-decoration: none; display: block; }
+        .canal-card:hover { border-color: #d4af37; transform: translateY(-5px); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3); }
+        .canal-card img { width: 100%; height: 70px; object-fit: contain; margin-bottom: 10px; }
+        .canal-card span { color: #eee; font-weight: bold; font-size: 14px; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <header><h1>FÉNIX TV</h1></header>
+    <div class="container">
+        <a href="https://rudo.video/live/telefe" class="canal-card"><img src="https://upload.wikimedia.org/wikipedia/commons/4/47/Logo_Telefe.png"><span>Telefe</span></a>
+        <a href="https://rudo.video/live/eltrece" class="canal-card"><img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/El_Trece_logo.png"><span>El Trece</span></a>
+        <a href="https://rudo.video/live/cronica" class="canal-card"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Cr%C3%B3nica_TV_logo_2022.png/250px-Cr%C3%B3nica_TV_logo_2022.png"><span>Crónica TV</span></a>
+        <a href="https://rudo.video/live/tycsports" class="canal-card"><img src="https://upload.wikimedia.org/wikipedia/commons/d/d2/TyC_Sports_logo_2016.png"><span>TyC Sports</span></a>
+        <a href="https://rudo.video/live/c9" class="canal-card"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Canal_9_Argentina_Logo_2022.png"><span>Canal 9</span></a>
+    </div>
+</body>
+</html>

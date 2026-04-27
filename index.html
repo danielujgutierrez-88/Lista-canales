@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fénix TV - Control Dinámico</title>
+    <title>Fénix TV - Control Total</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root { --oro: #d4af37; --celeste: #74acdf; }
@@ -14,7 +13,6 @@
             background: radial-gradient(circle at center, #001f3f 0%, #000 100%);
         }
         
-        /* FONDO DESLUMBRANTE */
         .fondo-animado { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; 
             background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Flag_of_Argentina.svg/1200px-Flag_of_Argentina.svg.png') center/cover;
             opacity: 0.1; filter: blur(5px);
@@ -23,31 +21,27 @@
         .cont-principal { flex: 1.4; display: flex; flex-direction: column; border-right: 1px solid var(--oro); }
         video { width: 100%; aspect-ratio: 16/9; background: #000; border-bottom: 2px solid var(--oro); }
 
-        /* AGENDA INTERACTIVA */
         .panel-agenda { flex: 1; overflow-y: auto; padding: 15px; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); }
-        .filtro-ligas { display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
-        .chip { background: #222; border: 1px solid var(--oro); color: var(--oro); padding: 5px 12px; border-radius: 20px; font-size: 10px; white-space: nowrap; }
+        .filtro-ligas { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 10px; }
+        .chip { background: #111; border: 1px solid var(--oro); color: var(--oro); padding: 6px 15px; border-radius: 20px; font-size: 11px; font-weight: bold; white-space: nowrap; cursor: pointer; }
         
         .card-evento { 
             background: rgba(255,255,255,0.03); border-radius: 10px; padding: 12px; margin-bottom: 10px;
             border: 1px solid rgba(212,175,55,0.2); display: flex; justify-content: space-between; align-items: center;
         }
-        .info-evento b { color: var(--celeste); font-size: 12px; }
-        .info-evento p { margin: 3px 0; font-size: 10px; color: #ccc; }
-        .hora-v { font-size: 16px; font-weight: 900; color: var(--oro); text-align: right; }
+        .info-evento b { color: var(--celeste); font-size: 12px; text-transform: uppercase; }
+        .info-evento p { margin: 4px 0; font-size: 11px; color: #eee; }
 
-        /* SIDEBAR DE ELECCIÓN */
         .sidebar-v { flex: 0.7; background: rgba(0,0,0,0.9); overflow-y: auto; padding: 10px; }
         .btn-canal { 
             background: #151515; border: 1px solid #333; padding: 15px 5px; color: #fff; 
             border-radius: 8px; font-size: 10px; margin-bottom: 8px; text-align: center;
-            font-weight: bold; transition: 0.3s;
+            font-weight: bold;
         }
         .btn-canal:active { background: var(--oro); color: #000; }
-        .tag-sec { font-size: 9px; color: var(--oro); font-weight: bold; text-align: center; margin: 15px 0 8px; text-transform: uppercase; border-bottom: 1px solid #222; }
 
         .hidden { display: none !important; }
-        #unl { position: fixed; top: 15px; left: 15px; z-index: 1000; background: var(--oro); border: none; width: 50px; height: 50px; border-radius: 50%; display: none; font-size: 24px; box-shadow: 0 0 20px var(--oro); }
+        #unl { position: fixed; top: 15px; left: 15px; z-index: 1000; background: var(--oro); border: none; width: 50px; height: 50px; border-radius: 50%; display: none; font-size: 24px; }
     </style>
 </head>
 <body>
@@ -59,35 +53,37 @@
     
     <div class="panel-agenda" id="ui-d">
         <div class="filtro-ligas">
-            <div class="chip">ARGENTINA</div><div class="chip">ESPAÑA</div><div class="chip">INGLATERRA</div><div class="chip">ITALIA</div>
+            <div class="chip">ARGENTINA 🇦🇷</div>
+            <div class="chip">ESPAÑA 🇪🇸</div>
+            <div class="chip">INGLATERRA 🏴󠁧󠁢󠁥󠁮󠁧󠁿</div>
+            <div class="chip">ITALIA 🇮🇹</div>
         </div>
         <div id="lista-eventos">
             <div class="card-evento">
                 <div class="info-evento">
-                    <b>LIGA PROFESIONAL 🇦🇷</b>
+                    <b>LIGA PROFESIONAL (FECHA 16)</b>
                     <p>Boca Juniors vs Racing</p>
-                    <p style="color:var(--oro)">Canal: TNT Sports / ESPN</p>
+                    <p style="color:var(--oro)">Transmite: TNT Sports / ESPN Premium</p>
                 </div>
-                <div class="hora-v">21:00</div>
+                <div style="font-size:18px; font-weight:900; color:var(--oro);">21:00</div>
             </div>
             <div class="card-evento">
                 <div class="info-evento">
-                    <b>PREMIER LEAGUE 🏴󠁧󠁢󠁥󠁮󠁧󠁿</b>
+                    <b>PREMIER LEAGUE</b>
                     <p>Liverpool vs Tottenham</p>
-                    <p style="color:var(--oro)">Canal: ESPN 2</p>
+                    <p style="color:var(--oro)">Transmite: ESPN</p>
                 </div>
-                <div class="hora-v">16:30</div>
+                <div style="font-size:18px; font-weight:900; color:var(--oro);">16:30</div>
             </div>
         </div>
     </div>
 </div>
 
 <div id="side" class="sidebar-v">
-    <div class="tag-sec">🏆 DEPORTES EN VIVO</div>
+    <div style="font-size:10px; color:var(--oro); font-weight:bold; text-align:center; margin-bottom:10px;">🏆 DEPORTES EN VIVO</div>
     <div id="box-sports"></div>
-    <div class="tag-sec" style="color:#555">📺 GENERAL / CABLE</div>
+    <div style="font-size:10px; color:#555; text-align:center; margin:15px 0 10px;">📺 GENERAL</div>
     <div id="box-gen"></div>
-    <button onclick="lockUI(true)" style="width:100%; padding:15px; background:var(--oro); border:none; font-weight:bold; border-radius:10px; margin-top:20px;">🔒 MODO CINE</button>
 </div>
 
 <script>
@@ -122,16 +118,14 @@
                     b.onclick = () => play(url, name);
                     
                     const ln = name.toLowerCase();
-                    // Priorizamos canales que el usuario quiere elegir
-                    if (ln.includes('sport') || ln.includes('tyc') || ln.includes('espn') || ln.includes('fox') || ln.includes('tnt') || ln.includes('dsports')) {
+                    if (ln.includes('sport') || ln.includes('tyc') || ln.includes('espn') || ln.includes('fox') || ln.includes('tnt')) {
                         document.getElementById('box-sports').appendChild(b);
                     } else {
                         document.getElementById('box-gen').appendChild(b);
                     }
                     
-                    // IA DE LIMPIEZA: Si no carga en 0.7 seg, se borra el botón
                     const c = new AbortController();
-                    setTimeout(() => c.abort(), 700);
+                    setTimeout(() => c.abort(), 800);
                     fetch(url, { method: 'HEAD', mode: 'no-cors', signal: c.signal }).catch(() => b.remove());
                 }
             }

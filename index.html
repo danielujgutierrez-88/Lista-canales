@@ -1,151 +1,140 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fénix TV IA - Elite</title>
+    <title>Fénix TV - Control Dinámico</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         :root { --oro: #d4af37; --celeste: #74acdf; }
         body { 
             background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; 
             display: flex; height: 100vh; overflow: hidden;
-            /* FONDO DESLUMBRANTE */
-            background: linear-gradient(-45deg, #000428, #004e92, #000000, #4b3d00);
-            background-size: 400% 400%;
-            animation: auraIA 12s ease infinite;
+            background: radial-gradient(circle at center, #001f3f 0%, #000 100%);
         }
-        @keyframes auraIA { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
-
-        .lado-tv { flex: 1.3; display: flex; flex-direction: column; border-right: 1px solid var(--oro); position: relative; }
-        .lado-tv::after { content: ""; position: absolute; top:0; left:0; width:100%; height:100%; background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Flag_of_Argentina.svg/1200px-Flag_of_Argentina.svg.png') center/cover; opacity: 0.05; z-index: -1; }
         
-        video { width: 100%; aspect-ratio: 16/9; background: #000; box-shadow: 0 0 30px rgba(212,175,55,0.2); }
-        .controles-ia { padding: 10px; background: rgba(255,255,255,0.03); backdrop-filter: blur(15px); border-bottom: 2px solid var(--oro); }
-
-        /* AGENDA DINÁMICA IA */
-        .agenda-ia { flex: 1; padding: 15px; overflow-y: auto; background: rgba(0,0,0,0.6); }
-        .partido-box { 
-            background: linear-gradient(90deg, rgba(212,175,55,0.1), transparent); 
-            border-left: 4px solid var(--oro); padding: 12px; margin-bottom: 10px; border-radius: 4px;
-            display: flex; justify-content: space-between; align-items: center;
+        /* FONDO DESLUMBRANTE */
+        .fondo-animado { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; 
+            background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Flag_of_Argentina.svg/1200px-Flag_of_Argentina.svg.png') center/cover;
+            opacity: 0.1; filter: blur(5px);
         }
-        .info-p { font-size: 10px; }
-        .hora-p { font-size: 15px; font-weight: 900; color: var(--oro); text-shadow: 0 0 10px var(--oro); }
 
-        /* BARRA LATERAL */
-        .sidebar { flex: 0.7; background: rgba(0,0,0,0.9); overflow-y: auto; padding: 8px; }
-        .tag-sec { font-size: 9px; padding: 5px; text-align: center; font-weight: bold; border-radius: 3px; margin: 12px 0 6px; text-transform: uppercase; }
-        .tag-oro { background: var(--oro); color: #000; box-shadow: 0 0 15px var(--oro); }
+        .cont-principal { flex: 1.4; display: flex; flex-direction: column; border-right: 1px solid var(--oro); }
+        video { width: 100%; aspect-ratio: 16/9; background: #000; border-bottom: 2px solid var(--oro); }
 
-        .btn-ch { 
-            background: rgba(255,255,255,0.05); border: 1px solid #333; padding: 12px 4px; 
-            color: #fff; border-radius: 6px; font-size: 9px; margin-bottom: 6px; text-align: center;
+        /* AGENDA INTERACTIVA */
+        .panel-agenda { flex: 1; overflow-y: auto; padding: 15px; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); }
+        .filtro-ligas { display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+        .chip { background: #222; border: 1px solid var(--oro); color: var(--oro); padding: 5px 12px; border-radius: 20px; font-size: 10px; white-space: nowrap; }
+        
+        .card-evento { 
+            background: rgba(255,255,255,0.03); border-radius: 10px; padding: 12px; margin-bottom: 10px;
+            border: 1px solid rgba(212,175,55,0.2); display: flex; justify-content: space-between; align-items: center;
         }
-        .btn-ch:active { background: var(--oro); color: #000; }
+        .info-evento b { color: var(--celeste); font-size: 12px; }
+        .info-evento p { margin: 3px 0; font-size: 10px; color: #ccc; }
+        .hora-v { font-size: 16px; font-weight: 900; color: var(--oro); text-align: right; }
 
-        .hide { display: none !important; }
-        #un-ia { position: fixed; top: 15px; left: 15px; z-index: 1000; background: var(--oro); border: none; width: 50px; height: 50px; border-radius: 50%; display: none; font-size: 22px; }
+        /* SIDEBAR DE ELECCIÓN */
+        .sidebar-v { flex: 0.7; background: rgba(0,0,0,0.9); overflow-y: auto; padding: 10px; }
+        .btn-canal { 
+            background: #151515; border: 1px solid #333; padding: 15px 5px; color: #fff; 
+            border-radius: 8px; font-size: 10px; margin-bottom: 8px; text-align: center;
+            font-weight: bold; transition: 0.3s;
+        }
+        .btn-canal:active { background: var(--oro); color: #000; }
+        .tag-sec { font-size: 9px; color: var(--oro); font-weight: bold; text-align: center; margin: 15px 0 8px; text-transform: uppercase; border-bottom: 1px solid #222; }
+
+        .hidden { display: none !important; }
+        #unl { position: fixed; top: 15px; left: 15px; z-index: 1000; background: var(--oro); border: none; width: 50px; height: 50px; border-radius: 50%; display: none; font-size: 24px; box-shadow: 0 0 20px var(--oro); }
     </style>
 </head>
 <body>
+<div class="fondo-animado"></div>
+<button id="unl" onclick="lockUI(false)">🔓</button>
 
-<button id="un-ia" onclick="lockUI(false)">🔓</button>
-
-<div class="lado-tv" id="main-view">
-    <video id="fénix-player" controls autoplay playsinline></video>
+<div class="cont-principal" id="ui-l">
+    <video id="p-tv" controls autoplay playsinline></video>
     
-    <div id="ui-up" class="controles-ia">
-        <div id="canal-n" style="font-size:10px; color:var(--oro); text-align:center; font-weight:900;">IA FÉNIX: ESCANEANDO SEÑALES...</div>
-        <input type="range" min="0" max="1" step="0.1" value="1" id="v-ia" style="width:100%; accent-color:var(--oro); margin-top:5px;">
-        <button onclick="lockUI(true)" style="background:var(--oro); border:none; width:100%; padding:8px; font-weight:bold; font-size:10px; border-radius:4px; margin-top:5px;">🔒 BLOQUEO TOTAL</button>
-    </div>
-
-    <div class="agenda-ia" id="ui-down">
-        <div style="color:var(--celeste); font-weight:bold; font-size:11px; margin-bottom:12px; letter-spacing:1px;">📅 AGENDA DEPORTIVA REAL (HOY)</div>
-        <div id="partidos-real">
+    <div class="panel-agenda" id="ui-d">
+        <div class="filtro-ligas">
+            <div class="chip">ARGENTINA</div><div class="chip">ESPAÑA</div><div class="chip">INGLATERRA</div><div class="chip">ITALIA</div>
+        </div>
+        <div id="lista-eventos">
+            <div class="card-evento">
+                <div class="info-evento">
+                    <b>LIGA PROFESIONAL 🇦🇷</b>
+                    <p>Boca Juniors vs Racing</p>
+                    <p style="color:var(--oro)">Canal: TNT Sports / ESPN</p>
+                </div>
+                <div class="hora-v">21:00</div>
             </div>
+            <div class="card-evento">
+                <div class="info-evento">
+                    <b>PREMIER LEAGUE 🏴󠁧󠁢󠁥󠁮󠁧󠁿</b>
+                    <p>Liverpool vs Tottenham</p>
+                    <p style="color:var(--oro)">Canal: ESPN 2</p>
+                </div>
+                <div class="hora-v">16:30</div>
+            </div>
+        </div>
     </div>
 </div>
 
-<div id="side-ia" class="sidebar">
-    <div class="tag-sec tag-oro">🏆 SEÑALES DEPORTES IA</div>
+<div id="side" class="sidebar-v">
+    <div class="tag-sec">🏆 DEPORTES EN VIVO</div>
     <div id="box-sports"></div>
-    <div class="tag-sec" style="background:#444">📺 NACIONALES / GENERAL</div>
-    <div id="box-general"></div>
+    <div class="tag-sec" style="color:#555">📺 GENERAL / CABLE</div>
+    <div id="box-gen"></div>
+    <button onclick="lockUI(true)" style="width:100%; padding:15px; background:var(--oro); border:none; font-weight:bold; border-radius:10px; margin-top:20px;">🔒 MODO CINE</button>
 </div>
 
 <script>
-    const videoIA = document.getElementById('fénix-player');
-    const hlsIA = new Hls();
+    const pTV = document.getElementById('p-tv');
+    const hls = new Hls();
 
-    function playCH(url, name) {
-        document.getElementById('canal-n').innerText = "VIVIENDO: " + name;
+    function play(u, n) {
         if (Hls.isSupported()) {
-            hlsIA.detachMedia(); hlsIA.loadSource(url); hlsIA.attachMedia(videoIA); videoIA.play();
-        } else { videoIA.src = url; }
+            hls.detachMedia(); hls.loadSource(u); hls.attachMedia(pTV); pTV.play();
+        } else { pTV.src = u; }
     }
 
     function lockUI(on) {
-        document.getElementById('ui-up').classList.toggle('hide', on);
-        document.getElementById('ui-down').classList.toggle('hide', on);
-        document.getElementById('side-ia').classList.toggle('hide', on);
-        document.getElementById('un-ia').style.display = on ? 'block' : 'none';
+        document.getElementById('ui-d').classList.toggle('hidden', on);
+        document.getElementById('side').classList.toggle('hidden', on);
+        document.getElementById('unl').style.display = on ? 'block' : 'none';
     }
 
-    // AGENDA REAL DINÁMICA
-    const pReal = [
-        {h: "19:00", t: "BOCA JUNIORS vs LANÚS", c: "TNT SPORTS"},
-        {h: "21:15", t: "RIVER PLATE vs TALLERES", c: "ESPN PREMIUM"},
-        {h: "16:00", t: "MAN. CITY vs ARSENAL", c: "ESPN 2"},
-        {h: "20:00", t: "FÓRMULA 1 (GP)", c: "FOX SPORTS"}
-    ];
-
-    document.getElementById('partidos-real').innerHTML = pReal.map(p => `
-        <div class="partido-box">
-            <div class="info-p"><b>${p.t}</b><br><span style="color:var(--celeste)">${p.c}</span></div>
-            <div class="hora-p">${p.h}</div>
-        </div>
-    `).join('');
-
     async function scan() {
-        // Múltiples fuentes para evitar el "Geo-blocked"
-        const fuentes = [
-            "https://raw.githubusercontent.com/Iptv-org/iptv/master/streams/ar.m3u",
-            "https://iptv-org.github.io/iptv/countries/ar.m3u"
-        ];
+        const res = await fetch("https://raw.githubusercontent.com/Iptv-org/iptv/master/streams/ar.m3u");
+        const data = await res.text();
+        const lines = data.split('\n');
         
-        for(let f of fuentes) {
-            try {
-                const res = await fetch(f);
-                const data = await res.text();
-                const lines = data.split('\n');
-                
-                for (let i = 0; i < lines.length; i++) {
-                    if (lines[i].includes('#EXTINF')) {
-                        const n = lines[i].split(',')[1].trim();
-                        const u = lines[i+1]?.trim();
-                        if (u && u.startsWith('http')) {
-                            const b = document.createElement('div');
-                            b.className = 'btn-ch';
-                            b.innerText = n;
-                            b.onclick = () => playCH(u, n);
-                            
-                            const ln = n.toLowerCase();
-                            // IA de filtrado de deportes
-                            if (ln.includes('sport') || ln.includes('tyc') || ln.includes('fox') || ln.includes('espn') || ln.includes('depor')) {
-                                document.getElementById('box-sports').appendChild(b);
-                            } else {
-                                document.getElementById('box-general').appendChild(b);
-                            }
-                            // Limpiador IA: Si tarda mucho, se elimina solo
-                            const ctrl = new AbortController();
-                            setTimeout(() => ctrl.abort(), 900);
-                            fetch(u, { method: 'HEAD', mode: 'no-cors', signal: ctrl.signal }).catch(() => b.remove());
-                        }
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].includes('#EXTINF')) {
+                const name = lines[i].split(',')[1].trim();
+                const url = lines[i+1]?.trim();
+                if (url && url.startsWith('http')) {
+                    const b = document.createElement('div');
+                    b.className = 'btn-canal';
+                    b.innerText = name;
+                    b.onclick = () => play(url, name);
+                    
+                    const ln = name.toLowerCase();
+                    // Priorizamos canales que el usuario quiere elegir
+                    if (ln.includes('sport') || ln.includes('tyc') || ln.includes('espn') || ln.includes('fox') || ln.includes('tnt') || ln.includes('dsports')) {
+                        document.getElementById('box-sports').appendChild(b);
+                    } else {
+                        document.getElementById('box-gen').appendChild(b);
                     }
+                    
+                    // IA DE LIMPIEZA: Si no carga en 0.7 seg, se borra el botón
+                    const c = new AbortController();
+                    setTimeout(() => c.abort(), 700);
+                    fetch(url, { method: 'HEAD', mode: 'no-cors', signal: c.signal }).catch(() => b.remove());
                 }
-            } catch(e) {}
+            }
         }
     }
     scan();

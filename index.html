@@ -3,134 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fénix TV - Edición Especial</title>
+    <title>Fénix TV - Elite</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        :root { --oro: #d4af37; --celeste: #74acdf; }
+        :root { --oro: #d4af37; --vidrio: rgba(255, 255, 255, 0.07); }
         body { 
-            background: #000; 
-            color: #fff; 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; 
-            display: flex; 
-            height: 100vh; 
-            overflow: hidden;
-            /* Fondo de agua con la bandera */
-            background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Flag_of_Argentina.svg/1200px-Flag_of_Argentina.svg.png');
+            background: #000; color: #fff; font-family: sans-serif; margin: 0; 
+            display: flex; height: 100vh; overflow: hidden;
+            background-image: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.9)), url('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Flag_of_Argentina.svg/1200px-Flag_of_Argentina.svg.png');
             background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
         }
         
-        .video-container { flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.4); }
-        video { width: 100%; aspect-ratio: 16/9; box-shadow: 0 0 30px rgba(0,0,0,0.9); }
-        
-        /* Panel de Control Estilo Cristal */
-        .glass-ui { 
-            padding: 15px; 
-            background: rgba(255, 255, 255, 0.05); 
-            backdrop-filter: blur(15px); 
-            border-top: 2px solid var(--oro);
-            border-bottom: 2px solid var(--oro);
-        }
-        .canal-status { font-size: 11px; color: var(--oro); font-weight: bold; text-align: center; margin-bottom: 10px; text-transform: uppercase; }
+        .pantalla { flex: 1; display: flex; flex-direction: column; }
+        video { width: 100%; aspect-ratio: 16/9; background: #000; box-shadow: 0 5px 20px #000; }
 
-        /* Sidebar con Columnas por Secciones */
-        .sidebar-sections { 
-            width: 150px; 
-            background: rgba(0, 0, 0, 0.7); 
-            backdrop-filter: blur(10px); 
-            overflow-y: auto; 
-            padding: 10px; 
-            border-left: 1px solid var(--oro);
-        }
-        .seccion-titulo { 
-            font-size: 10px; 
-            background: var(--oro); 
-            color: #000; 
-            padding: 4px; 
-            text-align: center; 
-            font-weight: 900; 
-            margin: 15px 0 8px 0;
-            border-radius: 3px;
-        }
+        .controles-cristal { padding: 12px; background: var(--vidrio); backdrop-filter: blur(20px); border-bottom: 1px solid var(--oro); }
+        .titulo-canal { font-size: 10px; color: var(--oro); text-align: center; font-weight: bold; margin-bottom: 8px; }
 
-        /* Botones de Vidrio 3D */
-        .btn-glass { 
-            background: rgba(255, 255, 255, 0.1); 
-            border: 1px solid rgba(255,255,255,0.2); 
-            padding: 10px 5px; 
-            color: #fff; 
-            border-radius: 8px; 
-            font-size: 9px; 
-            font-weight: bold; 
-            margin-bottom: 8px;
-            text-align: center;
-            transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        /* Panel Interesante de Abajo */
+        .panel-fénix { 
+            margin-top: auto; padding: 20px; background: rgba(0,0,0,0.8); 
+            border-top: 2px solid var(--oro); text-align: center;
         }
-        .btn-glass:active { background: var(--celeste); color: #000; transform: scale(0.95); }
+        #reloj { font-size: 28px; font-weight: bold; color: #fff; text-shadow: 0 0 10px var(--oro); }
+        .btn-update { background: #222; border: 1px solid var(--oro); color: var(--oro); padding: 8px; border-radius: 5px; font-size: 10px; margin-top: 10px; width: 100%; }
 
-        .slider-row { display: flex; align-items: center; gap: 10px; font-size: 9px; color: #ccc; margin-bottom: 8px; }
-        input[type=range] { flex: 1; accent-color: var(--oro); }
+        /* Sidebar con Filtro Estricto */
+        .sidebar { width: 140px; background: rgba(0,0,0,0.9); border-left: 1px solid var(--oro); overflow-y: auto; padding: 8px; }
+        .tag { font-size: 9px; padding: 4px; margin-top: 12px; text-align: center; border-radius: 3px; font-weight: bold; }
+        .t-dep { background: var(--oro); color: #000; }
+        .t-gen { background: #444; color: #fff; }
 
-        .btn-ninos { background: var(--oro); color: #000; border: none; padding: 8px; border-radius: 5px; font-weight: bold; font-size: 10px; width: 100%; }
+        .btn-tv { 
+            background: rgba(255,255,255,0.05); border: 1px solid #333; 
+            padding: 10px 4px; color: #eee; border-radius: 6px; font-size: 9px; margin-bottom: 6px;
+            text-align: center; cursor: pointer;
+        }
+        .btn-tv:active { background: var(--oro); color: #000; }
+
         .hidden { display: none !important; }
-        #btn-unblock { position: fixed; top: 20px; left: 20px; z-index: 10000; background: var(--oro); border: none; width: 55px; height: 55px; border-radius: 50%; display: none; font-size: 25px; box-shadow: 0 0 20px var(--oro); }
+        #unblock { position: fixed; top: 20px; left: 20px; z-index: 10000; background: var(--oro); border: none; width: 50px; height: 50px; border-radius: 50%; display: none; font-size: 20px; }
     </style>
 </head>
 <body>
 
-<button id="btn-unblock" onclick="lockUI(false)">🔓</button>
+<button id="unblock" onclick="lockUI(false)">🔓</button>
 
-<div class="video-container" id="main-view">
-    <video id="tv-player" controls autoplay playsinline></video>
+<div class="pantalla" id="view">
+    <video id="player" controls autoplay playsinline></video>
     
-    <div id="controls-panel" class="glass-ui">
-        <div id="info-tag" class="canal-status">FÉNIX ARGENTINA TV</div>
-        <div class="slider-row"><span>VOL</span><input type="range" min="0" max="1" step="0.1" value="1" id="v"></div>
-        <div class="slider-row"><span>BRI</span><input type="range" min="30" max="150" value="100" id="b"></div>
-        <button class="btn-ninos" onclick="lockUI(true)">🔒 BLOQUEO NIÑOS</button>
+    <div id="ui-top" class="controles-cristal">
+        <div id="info" class="titulo-canal">FÉNIX TV: BUSCANDO SEÑAL...</div>
+        <input type="range" min="0" max="1" step="0.1" value="1" id="v" style="width:100%; accent-color:var(--oro);">
+        <button onclick="lockUI(true)" style="background:var(--oro); border:none; width:100%; padding:8px; font-weight:bold; font-size:10px; border-radius:4px; margin-top:5px;">🔒 MODO NIÑOS</button>
+    </div>
+
+    <div class="panel-fénix" id="ui-bot">
+        <div id="reloj">00:00:00</div>
+        <div style="font-size: 9px; color: var(--oro); margin-top: 5px;">ESTADO: ESCANEANDO CANALES</div>
+        <button class="btn-update" onclick="location.reload()">🔄 RECARGAR GUÍA</button>
     </div>
 </div>
 
-<div id="side-menu" class="sidebar-sections">
-    <div class="seccion-titulo">🇦🇷 NACIONALES</div>
-    <div id="cat-nacional" style="display: flex; flex-direction: column;"></div>
-    
-    <div class="seccion-titulo">⚽ DEPORTES</div>
-    <div id="cat-deportes" style="display: flex; flex-direction: column;"></div>
-    
-    <div class="seccion-titulo">🍿 PELÍCULAS</div>
-    <div id="cat-cine" style="display: flex; flex-direction: column;"></div>
+<div id="side" class="sidebar">
+    <div class="tag t-dep">🏆 DEPORTES</div>
+    <div id="dep"></div>
+    <div class="tag t-gen">📺 GENERAL</div>
+    <div id="gen"></div>
 </div>
 
 <script>
-    const player = document.getElementById('tv-player');
+    const player = document.getElementById('player');
     const hls = new Hls();
-    const tag = document.getElementById('info-tag');
+    
+    // Reloj en tiempo real
+    setInterval(() => {
+        document.getElementById('reloj').innerText = new Date().toLocaleTimeString();
+    }, 1000);
 
-    function loadChannel(url, name) {
-        tag.innerText = "SINTONIZANDO: " + name;
+    function play(url, n) {
+        document.getElementById('info').innerText = "VIENDO: " + n;
         if (Hls.isSupported()) {
-            hls.detachMedia();
-            hls.loadSource(url);
-            hls.attachMedia(player);
-            player.play();
+            hls.detachMedia(); hls.loadSource(url); hls.attachMedia(player); player.play();
         } else { player.src = url; }
     }
 
     function lockUI(on) {
-        document.getElementById('controls-panel').classList.toggle('hidden', on);
-        document.getElementById('side-menu').classList.toggle('hidden', on);
-        document.getElementById('btn-unblock').style.display = on ? 'block' : 'none';
+        document.getElementById('ui-top').classList.toggle('hidden', on);
+        document.getElementById('ui-bot').classList.toggle('hidden', on);
+        document.getElementById('side').classList.toggle('hidden', on);
+        document.getElementById('unblock').style.display = on ? 'block' : 'none';
         if(on && player.requestFullscreen) { player.parentElement.requestFullscreen().catch(()=>{}); }
     }
 
-    document.getElementById('v').oninput = (e) => player.volume = e.target.value;
-    document.getElementById('b').oninput = (e) => document.getElementById('main-view').style.filter = `brightness(${e.target.value}%)`;
-
-    async function fetchList() {
+    async function load() {
         const res = await fetch("https://raw.githubusercontent.com/Iptv-org/iptv/master/streams/ar.m3u");
         const data = await res.text();
         const lines = data.split('\n');
@@ -141,26 +107,28 @@
                 const url = lines[i+1]?.trim();
                 
                 if (url && url.startsWith('http')) {
-                    const btn = document.createElement('div');
-                    btn.className = 'btn-glass';
-                    btn.innerText = name;
-                    btn.onclick = () => loadChannel(url, name);
+                    const b = document.createElement('div');
+                    b.className = 'btn-tv';
+                    b.innerText = name;
+                    b.onclick = () => play(url, name);
                     
-                    // Lógica simple de secciones
-                    if (name.toLowerCase().includes('tyc') || name.toLowerCase().includes('deport') || name.toLowerCase().includes('fox')) {
-                        document.getElementById('cat-deportes').appendChild(btn);
-                    } else if (name.toLowerCase().includes('cine') || name.toLowerCase().includes('film')) {
-                        document.getElementById('cat-cine').appendChild(btn);
+                    const low = name.toLowerCase();
+                    if (low.includes('sport') || low.includes('tyc') || low.includes('fox') || low.includes('espn') || low.includes('depor')) {
+                        document.getElementById('dep').appendChild(b);
                     } else {
-                        document.getElementById('cat-nacional').appendChild(btn);
+                        document.getElementById('gen').appendChild(b);
                     }
                     
-                    fetch(url, { method: 'HEAD', mode: 'no-cors' }).catch(() => btn.remove());
+                    // FILTRO ULTRA RÁPIDO: Si no responde en 2.5 seg, se borra
+                    const controller = new AbortController();
+                    const timeout = setTimeout(() => controller.abort(), 2500);
+                    fetch(url, { method: 'HEAD', mode: 'no-cors', signal: controller.signal })
+                        .catch(() => b.remove());
                 }
             }
         }
     }
-    fetchList();
+    load();
 </script>
 </body>
 </html>

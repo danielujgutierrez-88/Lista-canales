@@ -3,68 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fénix TV Pro 2026</title>
+    <title>Fénix TV - Edición Especial</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        :root { --gold: #d4af37; --bg: #050505; --card: rgba(255, 255, 255, 0.05); }
-        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        :root { --oro: #d4af37; --celeste: #74acdf; }
+        body { 
+            background: #000; 
+            color: #fff; 
+            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden;
+            /* Fondo de agua con la bandera */
+            background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Flag_of_Argentina.svg/1200px-Flag_of_Argentina.svg.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
         
-        /* Reproductor con sombra interna */
-        .video-container { position: sticky; top: 0; z-index: 1000; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        video { width: 100%; aspect-ratio: 16/9; display: block; }
+        .video-container { flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.4); }
+        video { width: 100%; aspect-ratio: 16/9; box-shadow: 0 0 30px rgba(0,0,0,0.9); }
         
-        /* Panel de Cristal (Moderno) */
-        .glass-panel { background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(10px); padding: 10px; border-bottom: 1px solid rgba(212, 175, 55, 0.3); }
-        .canal-info { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); text-align: center; margin-bottom: 8px; font-weight: 800; }
-        
-        .controls { display: flex; flex-direction: column; gap: 10px; }
-        .row { display: flex; align-items: center; gap: 15px; font-size: 9px; color: #aaa; }
-        input[type=range] { flex: 1; height: 4px; accent-color: var(--gold); cursor: pointer; }
-        
-        /* Botón Candado Estilo 3D */
-        .lock-btn { background: linear-gradient(145deg, #d4af37, #b8962e); color: #000; border: none; padding: 8px; border-radius: 20px; font-weight: bold; font-size: 10px; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); transition: 0.3s; }
-        .lock-btn:active { transform: scale(0.95); box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5); }
+        /* Panel de Control Estilo Cristal */
+        .glass-ui { 
+            padding: 15px; 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(15px); 
+            border-top: 2px solid var(--oro);
+            border-bottom: 2px solid var(--oro);
+        }
+        .canal-status { font-size: 11px; color: var(--oro); font-weight: bold; text-align: center; margin-bottom: 10px; text-transform: uppercase; }
 
-        /* Grilla de Canales Moderna */
-        .scroll-area { flex: 1; overflow-y: auto; padding: 15px; background: radial-gradient(circle at top, #111 0%, #050505 100%); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 12px; }
-        
-        /* Botones con Efecto 3D Realista */
-        .card { background: var(--card); border: 1px solid rgba(255,255,255,0.1); padding: 12px 5px; color: #eee; border-radius: 12px; font-size: 10px; font-weight: 600; text-align: center; min-height: 50px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; }
-        .card:active { background: var(--gold); color: #000; transform: translateY(2px); box-shadow: none; }
+        /* Sidebar con Columnas por Secciones */
+        .sidebar-sections { 
+            width: 150px; 
+            background: rgba(0, 0, 0, 0.7); 
+            backdrop-filter: blur(10px); 
+            overflow-y: auto; 
+            padding: 10px; 
+            border-left: 1px solid var(--oro);
+        }
+        .seccion-titulo { 
+            font-size: 10px; 
+            background: var(--oro); 
+            color: #000; 
+            padding: 4px; 
+            text-align: center; 
+            font-weight: 900; 
+            margin: 15px 0 8px 0;
+            border-radius: 3px;
+        }
 
-        /* Pantalla de Bloqueo */
-        .hide { display: none !important; }
-        #unlock { position: fixed; top: 20px; right: 20px; z-index: 9999; background: var(--gold); border: none; width: 50px; height: 50px; border-radius: 50%; font-size: 20px; display: none; box-shadow: 0 0 20px var(--gold); }
+        /* Botones de Vidrio 3D */
+        .btn-glass { 
+            background: rgba(255, 255, 255, 0.1); 
+            border: 1px solid rgba(255,255,255,0.2); 
+            padding: 10px 5px; 
+            color: #fff; 
+            border-radius: 8px; 
+            font-size: 9px; 
+            font-weight: bold; 
+            margin-bottom: 8px;
+            text-align: center;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .btn-glass:active { background: var(--celeste); color: #000; transform: scale(0.95); }
+
+        .slider-row { display: flex; align-items: center; gap: 10px; font-size: 9px; color: #ccc; margin-bottom: 8px; }
+        input[type=range] { flex: 1; accent-color: var(--oro); }
+
+        .btn-ninos { background: var(--oro); color: #000; border: none; padding: 8px; border-radius: 5px; font-weight: bold; font-size: 10px; width: 100%; }
+        .hidden { display: none !important; }
+        #btn-unblock { position: fixed; top: 20px; left: 20px; z-index: 10000; background: var(--oro); border: none; width: 55px; height: 55px; border-radius: 50%; display: none; font-size: 25px; box-shadow: 0 0 20px var(--oro); }
     </style>
 </head>
 <body>
 
-<button id="unlock" onclick="lock(false)">🔓</button>
+<button id="btn-unblock" onclick="lockUI(false)">🔓</button>
 
-<div class="video-container">
-    <video id="player" controls autoplay playsinline></video>
-    <div class="glass-panel">
-        <div id="now-playing" class="canal-info">SISTEMA FÉNIX ACTIVO</div>
-        <div id="ui" class="controls">
-            <div class="row"><span>VOL</span><input type="range" min="0" max="1" step="0.1" value="1" id="vol"></div>
-            <div class="row"><span>BRI</span><input type="range" min="30" max="150" value="100" id="bri"></div>
-            <button class="lock-btn" onclick="lock(true)">🔒 BLOQUEAR INTERFAZ</button>
-        </div>
+<div class="video-container" id="main-view">
+    <video id="tv-player" controls autoplay playsinline></video>
+    
+    <div id="controls-panel" class="glass-ui">
+        <div id="info-tag" class="canal-status">FÉNIX ARGENTINA TV</div>
+        <div class="slider-row"><span>VOL</span><input type="range" min="0" max="1" step="0.1" value="1" id="v"></div>
+        <div class="slider-row"><span>BRI</span><input type="range" min="30" max="150" value="100" id="b"></div>
+        <button class="btn-ninos" onclick="lockUI(true)">🔒 BLOQUEO NIÑOS</button>
     </div>
 </div>
 
-<div id="guide" class="scroll-area">
-    <div class="grid" id="container"></div>
+<div id="side-menu" class="sidebar-sections">
+    <div class="seccion-titulo">🇦🇷 NACIONALES</div>
+    <div id="cat-nacional" style="display: flex; flex-direction: column;"></div>
+    
+    <div class="seccion-titulo">⚽ DEPORTES</div>
+    <div id="cat-deportes" style="display: flex; flex-direction: column;"></div>
+    
+    <div class="seccion-titulo">🍿 PELÍCULAS</div>
+    <div id="cat-cine" style="display: flex; flex-direction: column;"></div>
 </div>
 
 <script>
-    const player = document.getElementById('player');
+    const player = document.getElementById('tv-player');
     const hls = new Hls();
-    const info = document.getElementById('now-playing');
+    const tag = document.getElementById('info-tag');
 
-    function play(url, name) {
-        info.innerText = "SINTONIZANDO: " + name;
+    function loadChannel(url, name) {
+        tag.innerText = "SINTONIZANDO: " + name;
         if (Hls.isSupported()) {
             hls.detachMedia();
             hls.loadSource(url);
@@ -73,38 +120,47 @@
         } else { player.src = url; }
     }
 
-    function lock(status) {
-        document.getElementById('ui').classList.toggle('hide', status);
-        document.getElementById('guide').classList.toggle('hide', status);
-        document.getElementById('unlock').style.display = status ? 'block' : 'none';
-        if(status && player.requestFullscreen) { player.parentElement.requestFullscreen().catch(()=>{}); }
+    function lockUI(on) {
+        document.getElementById('controls-panel').classList.toggle('hidden', on);
+        document.getElementById('side-menu').classList.toggle('hidden', on);
+        document.getElementById('btn-unblock').style.display = on ? 'block' : 'none';
+        if(on && player.requestFullscreen) { player.parentElement.requestFullscreen().catch(()=>{}); }
     }
 
-    document.getElementById('vol').oninput = (e) => player.volume = e.target.value;
-    document.getElementById('bri').oninput = (e) => document.body.style.filter = `brightness(${e.target.value}%)`;
+    document.getElementById('v').oninput = (e) => player.volume = e.target.value;
+    document.getElementById('b').oninput = (e) => document.getElementById('main-view').style.filter = `brightness(${e.target.value}%)`;
 
-    async function load() {
+    async function fetchList() {
         const res = await fetch("https://raw.githubusercontent.com/Iptv-org/iptv/master/streams/ar.m3u");
-        const text = await res.text();
-        const lines = text.split('\n');
-        const cont = document.getElementById('container');
+        const data = await res.text();
+        const lines = data.split('\n');
         
         for (let i = 0; i < lines.length; i++) {
             if (lines[i].includes('#EXTINF')) {
                 const name = lines[i].split(',')[1].trim();
                 const url = lines[i+1]?.trim();
+                
                 if (url && url.startsWith('http')) {
-                    const b = document.createElement('div');
-                    b.className = 'card';
-                    b.innerText = name;
-                    b.onclick = () => play(url, name);
-                    cont.appendChild(b);
-                    fetch(url, { method: 'HEAD', mode: 'no-cors' }).catch(() => b.remove());
+                    const btn = document.createElement('div');
+                    btn.className = 'btn-glass';
+                    btn.innerText = name;
+                    btn.onclick = () => loadChannel(url, name);
+                    
+                    // Lógica simple de secciones
+                    if (name.toLowerCase().includes('tyc') || name.toLowerCase().includes('deport') || name.toLowerCase().includes('fox')) {
+                        document.getElementById('cat-deportes').appendChild(btn);
+                    } else if (name.toLowerCase().includes('cine') || name.toLowerCase().includes('film')) {
+                        document.getElementById('cat-cine').appendChild(btn);
+                    } else {
+                        document.getElementById('cat-nacional').appendChild(btn);
+                    }
+                    
+                    fetch(url, { method: 'HEAD', mode: 'no-cors' }).catch(() => btn.remove());
                 }
             }
         }
     }
-    load();
+    fetchList();
 </script>
 </body>
 </html>
